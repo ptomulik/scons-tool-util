@@ -1,0 +1,26 @@
+language:
+  python
+
+python:
+  - 3.5
+  - 3.6
+  - 3.7-dev
+
+install:
+  - pip install -U pip
+  - pip --version
+  - pip install -r requirements-dev.txt
+  - pip install coveralls
+  - pip install coverage
+  - pip install -e .
+  - python bin/downloads.py
+
+before_script:
+  - which python
+
+script:
+  - coverage run --source=sconstool.util -m unittest discover -t . -s test/unit
+  - python runtest -e test/system/
+
+after_script:
+  - coveralls
