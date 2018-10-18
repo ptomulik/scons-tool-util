@@ -1,5 +1,5 @@
-scons-tool-util
-==================
+SCons Tool Utilities
+====================
 
 .. image:: https://badge.fury.io/py/scons-tool-util.svg
     :target: https://badge.fury.io/py/scons-tool-util
@@ -17,12 +17,12 @@ scons-tool-util
    :target: https://codeclimate.com/github/ptomulik/scons-tool-util/maintainability
    :alt: Maintainability
 
-A little python package that helps loading externally managed SCons_ tools.
+A library supporting other scons-tool-* packages.
 
 Installation
 ------------
 
-To install module from pypi_, type
+To install package from pypi_, type
 
 .. code-block:: shell
 
@@ -45,11 +45,6 @@ This will install a namespaced package ``sconstool.util`` in project's
 virtual environment.
 
 
-Usage examples
---------------
-
-TBD
-
 More documentation
 ------------------
 
@@ -58,7 +53,7 @@ See the `online documentation`_.
 LICENSE
 -------
 
-Copyright (c) 2018 by Pawel Tomulik <ptomulik@meil.pw.edu.pl>
+Copyright (c) 2018 by Paweł Tomulik <ptomulik@meil.pw.edu.pl>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

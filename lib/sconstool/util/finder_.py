@@ -227,7 +227,7 @@ class ToolFinder:
 
     def _detect(self, env, name, path=None):
         if env.WhereIs(name, path):
-            return name
+            return env.subst(name)
         else:
             return None
 
@@ -235,7 +235,7 @@ class ToolFinder:
         isabs = os.path.isabs
         normpath = os.path.normpath
         strip = getattr(self, 'strip_%s' % where)
-        if isabs(detected) and detected == normpath(self.name) or strip:
+        if isabs(detected) or strip:
             return detected
         return env.WhereIs(self.name, getattr(self, where))
 

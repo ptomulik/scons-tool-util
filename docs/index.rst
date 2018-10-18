@@ -1,13 +1,13 @@
-Scons Tool Loader
-*****************
+Scons Tool Util
+***************
 
 Welcome to scons-tool-util_ documentation!
 
 Purpose
 =======
 
-`SCons Tool Util`_ is a library of utility functions and objects used commonly
-by other ``scons-tool-*`` packages.
+`SCons Tool Util`_ is a library of reusable functions and objects for SCons
+tools' developers.
 
 Documentation
 =============
@@ -30,3 +30,5 @@ Indices and tables
 .. _scons-tool-util: https://github.com/ptomulik/scons-tool-util/
 .. _SCons: https://scons.org/
 .. _python: https://python.org/
+
+.. <!--- vim: set expandtab tabstop=2 shiftwidth=2 syntax=rst: -->

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Pawel Tomulik
+# Copyright (c) 2018 Paweł Tomulik
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -477,14 +477,12 @@ class ToolFinderTests(unittest.TestCase):
                 return full
         return None
 
-    def _detect_1(self, prog, path):
-        if self._whereis_1(prog, path):
-            return prog
-        return None
+    def _subst_1(self, s):
+        return s
 
     def _env_1(self):
-        return mock.Mock(Detect=mock.Mock(side_effect=self._detect_1),
-                         WhereIs=mock.Mock(side_effect=self._whereis_1))
+        return mock.Mock(WhereIs=mock.Mock(side_effect=self._whereis_1),
+                         subst=mock.Mock(side_effect=self._subst_1))
 
     def test__adjust_detected(self):
         env = self._env_1()
@@ -559,6 +557,9 @@ class ToolFinderTests(unittest.TestCase):
 
         find = finder_.ToolFinder('puppet', strip_fallback_path=True, priority_path=pp, fallback_path=fp)
         self.assertEqual(find._apply(env), 'puppet')
+
+        find = finder_.ToolFinder('inexistent')
+        self.assertIsNone(find._apply(env))
 
     def test__call(self):
         env = self._env_1()

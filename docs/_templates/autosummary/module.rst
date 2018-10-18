@@ -1,4 +1,4 @@
-{{ ['Module', fullname|escape] | join(': ') | underline }}
+{{ name | underline }}
 
 .. automodule:: {{fullname}}
    :members:
