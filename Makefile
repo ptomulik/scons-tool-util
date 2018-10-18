@@ -5,8 +5,8 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 SPHINXPROJ    = scons-tool-util
-SOURCEDIR     = doc
-BUILDDIR      = build/doc
+SOURCEDIR     = docs
+BUILDDIR      = build/docs
 
 # Put it first so that "make" without argument is like "make help".
 help:

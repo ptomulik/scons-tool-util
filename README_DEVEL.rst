@@ -70,8 +70,8 @@ Generating HTML documentation
 
    pipenv run make html
 
-The generated documentation is writen to ``build/doc/html``, with the index
-file ``build/doc/html/index.html``.
+The generated documentation is writen to ``build/docs/html``, with the index
+file ``build/docs/html/index.html``.
 
 LICENSE
 -------
