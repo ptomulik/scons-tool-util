@@ -33,7 +33,7 @@
 __pycache__
 
 
-site_scons/
+/site_scons/
 
 # Scons testing framework
 /runtest.py

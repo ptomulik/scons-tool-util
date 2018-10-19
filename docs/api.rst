@@ -40,7 +40,7 @@ summary below provides links to a full documentation for each function.
 .. autosummary::
     :toctree: api/functions
 
-    add_dict_property_ro
+    add_ro_dict_property
     ensure_kwarg_in
     ensure_kwarg_not_in
     check_kwarg

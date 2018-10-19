@@ -6,14 +6,14 @@ Welcome to scons-tool-util_ documentation!
 Purpose
 =======
 
-`SCons Tool Util`_ is a library of reusable functions and objects for SCons
-tools' developers.
+`SCons Tool Util`_ package is a library of reusable functions and objects for
+SCons tools' developers.
 
-Documentation
-=============
+Table of Contents
+=================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 1
 
    user
    developer

@@ -100,8 +100,9 @@ html_theme_options = {
     'github_button': 'true',
     'github_user': 'ptomulik',
     'github_repo': 'scons-tool-util',
-    #'show_relbars': True,
+    # 'show_relbars': True,
     'sidebar_includehidden': True,
+    'fixed_sidebar': True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -117,8 +118,7 @@ html_static_path = ['_static']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 #
-html_sidebars = {
-    '**': [
+html_sidebars = {'**': [
         'about.html',
         'globaltoc.html',
         'relations.html',

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python3
 #
 # Copyright (c) 2014-2018 by Paweł Tomulik <ptomulik@meil.pw.edu.pl>
@@ -22,6 +23,8 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
+"""Ensure that the toolfinder/hammer example from user documentation works"""
+
 import TestSCons
 import re
 import sys
@@ -32,61 +35,14 @@ if sys.platform == 'win32':
 else:
     test = TestSCons.TestSCons()
 
-test.subdir(['bin'])
+test.dir_fixture('../../../../../docs/user/utils/toolfinder/hammer')
 
-test.write('bin/hammer.py', """\
-#!%s
-import sys
-with open(sys.argv[1], 'w') as target:
-    with open(sys.argv[2], 'r') as source:
-      target.write(source.read().replace('nail', 'drived in nail'))
-""" % sys.executable)
+test.run()
+expect = '%s %s output.txt input.txt' % (sys.executable, os.path.join('bin','hammer.py'))
+test.must_contain_all_lines(test.stdout(), [expect])
 
-# bat file for win32
-test.write('bin/hammer.bat', """\
-@echo off
-%s %s %%*
-""" % (sys.executable, test.workpath('bin/hammer.py')))
-
-# shell script for posix
-test.write('bin/hammer', """\
-#!/usr/bin/env sh
-%s %s "$@"
-""" % (sys.executable, test.workpath('bin/hammer.py')))
-os.chmod(test.workpath('bin/hammer'), 0o755)
-
-test.subdir(['site_scons'])
-test.subdir(['site_scons', 'site_tools'])
-test.write('site_scons/site_tools/hammer.py', r"""\
-from sconstool.util import *
-from SCons.Builder import Builder
-
-find_hammer = ToolFinder('hammer')
-
-def generate(env):
-    env['HAMMER'] = find_hammer(env)
-    env['HAMMERCOM'] = '$HAMMER $TARGET $SOURCE'
-    env['BUILDERS']['Hammer'] = Builder(action='$HAMMERCOM')
-
-def exists(env):
-    return find_hammer(env)
-""")
-
-test.write('hammer.in', """\
-We have twenty nails.
-""")
-
-test.write('SConstruct', r"""\
-env = Environment(tools=[])
-env.PrependENVPath('PATH', %(bindir)r)
-env.Tool('hammer')
-tgt = env.Hammer('hammer.out', 'hammer.in')
-""" % {'bindir': test.workpath('bin')})
-
-test.run(['-Q'])
-
-test.must_exist('hammer.out')
-test.must_contain('hammer.out', r"We have twenty drived in nails")
+test.must_exist('output.txt')
+test.must_contain('output.txt', 'We have twenty drived in nails.')
 
 test.pass_test()
 

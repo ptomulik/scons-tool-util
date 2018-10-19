@@ -1,15 +1,15 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 """Miscellaneous utilities.
 """
 
-__all__ = ('add_dict_property_ro',
+__all__ = ('add_ro_dict_property',
            'ensure_kwarg_in',
            'ensure_kwarg_not_in',
            'check_kwarg',
            'check_kwargs')
 
 
-def add_dict_property_ro(cls, dictattr, attr, default=None, **kw):
+def add_ro_dict_property(cls, dictattr, attr, default=None, **kw):
     """Add to class **cls** a read-only property returning a predefined entry
        from a dict.
 
@@ -23,7 +23,9 @@ def add_dict_property_ro(cls, dictattr, attr, default=None, **kw):
             the corresponding key in the dictionary,
        :param default:
             default value returned by the property, if the dictionary
-            has no requested key.
+            has no requested key, if **default** is callable, it shall
+            be a function ``default(obj)``, where an instance of **cls**
+            will be passed as ``obj``,
        :keyword str doc:
             optional documentation string, the string may use substitutions,
             such as ``"%(cls)s"``, ``"%(dictattr)s"``, ``"%(attr)s"``,
@@ -35,8 +37,12 @@ def add_dict_property_ro(cls, dictattr, attr, default=None, **kw):
     else:
         (attr, key) = attr  # assumed it's a tuple or alike
 
-    def getter(obj, k=key):
-        return getattr(obj, dictattr).get(k, default)
+    if callable(default):
+        def getter(obj, k=key):
+            return getattr(obj, dictattr).get(k, default(obj))
+    else:
+        def getter(obj, k=key):
+            return getattr(obj, dictattr).get(k, default)
 
     try:
         tdoc = kw['doc']

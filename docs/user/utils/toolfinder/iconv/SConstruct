@@ -1,0 +1,3 @@
+# SConstruct
+env = Environment(tools=['iconv'])
+env.Iconv('utf8.txt', 'latin2.txt', ICONVFROM='latin2')

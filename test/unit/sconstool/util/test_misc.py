@@ -26,13 +26,13 @@ import unittest
 import unittest.mock as mock
 import sconstool.util.misc_ as misc_
 
-class add_dict_property_ro_Tests(unittest.TestCase):
-    def test_with_attr_only(self):
+class add_ro_dict_property_Tests(unittest.TestCase):
+    def test__attr_only(self):
         class X:
             def __init__(self, **kw):
                 self._kw = kw
-        misc_.add_dict_property_ro(X, '_kw', 'foo')
-        misc_.add_dict_property_ro(X, '_kw', 'bar')
+        misc_.add_ro_dict_property(X, '_kw', 'foo')
+        misc_.add_ro_dict_property(X, '_kw', 'bar')
 
         self.assertTrue(hasattr(X,'foo'))
         self.assertTrue(hasattr(X,'bar'))
@@ -46,12 +46,12 @@ class add_dict_property_ro_Tests(unittest.TestCase):
         self.assertEqual(x.foo, 'FOO')
         self.assertEqual(x.bar, 'BAR')
 
-    def test_with_attr_key(self):
+    def test__attr_key(self):
         class X:
             def __init__(self, **kw):
                 self._kw = kw
-        misc_.add_dict_property_ro(X, '_kw', ('foo', '_foo'))
-        misc_.add_dict_property_ro(X, '_kw', ('bar', '_bar'))
+        misc_.add_ro_dict_property(X, '_kw', ('foo', '_foo'))
+        misc_.add_ro_dict_property(X, '_kw', ('bar', '_bar'))
 
         self.assertTrue(hasattr(X,'foo'))
         self.assertTrue(hasattr(X,'bar'))
@@ -65,12 +65,53 @@ class add_dict_property_ro_Tests(unittest.TestCase):
         self.assertEqual(x.foo, 'FOO')
         self.assertEqual(x.bar, 'BAR')
 
-    def test_with_doc(self):
+    def test__default(self):
         class X:
             def __init__(self, **kw):
                 self._kw = kw
-        misc_.add_dict_property_ro(X, '_kw', 'foo', doc="Returns %(attr)s or %(default)r")
-        misc_.add_dict_property_ro(X, '_kw', 'bar', 'missing', doc="Returns %(attr)s or %(default)r")
+        misc_.add_ro_dict_property(X, '_kw', 'foo', 'DEFAULT FOO')
+        misc_.add_ro_dict_property(X, '_kw', 'bar', 'DEFAULT BAR')
+
+        self.assertTrue(hasattr(X,'foo'))
+        self.assertTrue(hasattr(X,'bar'))
+        self.assertIsNone(X.__doc__)
+
+        x = X()
+        self.assertEqual(x.foo, 'DEFAULT FOO')
+        self.assertEqual(x.bar, 'DEFAULT BAR')
+
+        x = X(foo='FOO', bar='BAR')
+        self.assertEqual(x.foo, 'FOO')
+        self.assertEqual(x.bar, 'BAR')
+
+    def test__callable_default(self):
+        class X:
+            def __init__(self, **kw):
+                self._kw = kw
+                self._default_foo = 'DEFAULT FOO'
+                self._default_bar = 'DEFAULT BAR'
+
+        misc_.add_ro_dict_property(X, '_kw', 'foo', lambda obj: obj._default_foo)
+        misc_.add_ro_dict_property(X, '_kw', 'bar', lambda obj: obj._default_bar)
+
+        self.assertTrue(hasattr(X,'foo'))
+        self.assertTrue(hasattr(X,'bar'))
+        self.assertIsNone(X.__doc__)
+
+        x = X()
+        self.assertEqual(x.foo, 'DEFAULT FOO')
+        self.assertEqual(x.bar, 'DEFAULT BAR')
+
+        x = X(foo='FOO', bar='BAR')
+        self.assertEqual(x.foo, 'FOO')
+        self.assertEqual(x.bar, 'BAR')
+
+    def test__doc(self):
+        class X:
+            def __init__(self, **kw):
+                self._kw = kw
+        misc_.add_ro_dict_property(X, '_kw', 'foo', doc="Returns %(attr)s or %(default)r")
+        misc_.add_ro_dict_property(X, '_kw', 'bar', 'missing', doc="Returns %(attr)s or %(default)r")
 
         self.assertEqual(X.foo.__doc__, "Returns foo or None")
         self.assertEqual(X.bar.__doc__, "Returns bar or %r" % 'missing')

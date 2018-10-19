@@ -1,0 +1,3 @@
+# SConstruct
+env = Environment(tools=['hammer'])
+env.Hammer('output.txt', 'input.txt')

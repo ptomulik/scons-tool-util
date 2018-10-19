@@ -21,4 +21,4 @@ build: off
 
 test_script:
   - python -m pipenv run python -m unittest discover -t . -s "test\\unit"
-  - python -m pipenv run python runtest -e "test\\system"
+  - cmd: powershell -Command "& { python -m pipenv run python runtest -e test\\system; if($LastExitCode -eq 2 -Or $LastExitCode -eq 0) { $host.SetShouldExit(0)} else {$host.SetShouldExit(1)}}"

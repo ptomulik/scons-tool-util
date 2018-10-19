@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+#!/usr/bin/env python3
 #
-# Copyright (c) 2018 Paweł Tomulik
+# Copyright (c) 2014-2018 by Paweł Tomulik <ptomulik@meil.pw.edu.pl>
 #
 # Permission is hereby granted, free of charge, to any person obtaining
 # a copy of this software and associated documentation files (the
@@ -22,26 +23,35 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import unittest
-import sconstool.util as util
-import sconstool.util.misc_ as misc_
-import sconstool.util.finder_ as finder_
+"""Ensure that the toolfinder/iconv example from user documentation works"""
 
+import TestSCons
+import re
+import sys
+import os
 
-class package_symbols_Tests(unittest.TestCase):
-    def test_misc_(self):
-        self.assertIs(util.add_ro_dict_property, misc_.add_ro_dict_property)
-        self.assertIs(util.ensure_kwarg_in, misc_.ensure_kwarg_in)
-        self.assertIs(util.ensure_kwarg_not_in, misc_.ensure_kwarg_not_in)
-        self.assertIs(util.check_kwarg, misc_.check_kwarg)
-        self.assertIs(util.check_kwargs, misc_.check_kwargs)
+if sys.platform == 'win32':
+    test = TestSCons.TestSCons(program='scons.bat', interpreter=None)
+else:
+    test = TestSCons.TestSCons()
 
-    def test_finder_(self):
-        self.assertIs(util.ToolFinder, finder_.ToolFinder)
+if not test.where_is('iconv'):
+    test.skip_test("Could not find 'iconv', skipping test(s).\n")
 
+test.dir_fixture('../../../../../docs/user/utils/toolfinder/iconv')
 
-if __name__ == '__main__':
-    unittest.main()
+test.run()
+test.must_contain_all_lines(test.stdout(), ['iconv -f latin2 -t utf8 latin2.txt > utf8.txt'])
+
+test.must_exist('utf8.txt')
+with open(test.workpath('latin2.txt'), 'r', encoding='latin2') as f:
+    latin2 = f.read()
+
+with open(test.workpath('utf8.txt'), 'r', encoding='utf8') as f:
+    utf8 = f.read()
+test.must_contain_exactly_lines(utf8, latin2.splitlines())
+
+test.pass_test()
 
 # Local Variables:
 # tab-width:4

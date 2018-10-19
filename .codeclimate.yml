@@ -6,7 +6,7 @@ checks:
       threshold: 30
 exclude_patterns:
   - "build/"
-  - "doc/"
+  - "docs/"
   - "test/"
   - "bin/"
   - "testing/"
