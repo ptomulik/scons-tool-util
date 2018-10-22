@@ -33,6 +33,13 @@ including variable substitutions, like ``name="$PYTHONNAME"``.
 
    python = ToolFinder('python', name='$PYTHONNAME')
 
+A sequence of file names may also be passed in as **name** (alternative names
+for the program).
+
+.. code-block:: python
+
+   # Will search for 'python3', then 'python', then 'python2' in each path
+   python = ToolFinder('python', name=['python3', 'python', 'python2'])
 
 By default, :class:`.ToolFinder` searches within the standard SCons PATH
 (``env['ENV']['PATH']``). This can be changed, by providing ``path`` argument

@@ -104,28 +104,32 @@ class ToolFinder:
                 ``None`` is returned.
            :rtype: str
         """
-        return self._apply(env)
+        return self._search(env)
 
-    def _whereis(self, env, where):
+    def _whereis(self, env, prog, where):
         path = getattr(self, where)
-        return env.WhereIs(self.name, path, self.pathext, self.reject)
+        return env.WhereIs(prog, path, self.pathext, self.reject)
 
-    def _adjust_result(self, env, found, where):
-        name = env.subst(self.name)
+    def _adjust_result(self, env, result, where):
+        prog = env.subst(result[0])
         strip = getattr(self, 'strip_%s' % where)
-        if os.path.isabs(name) or strip:
-            return name
-        return found
+        if os.path.isabs(prog) or strip:
+            return prog
+        return result[1]
 
-    def _search(self, env, where):
-        found = self._whereis(env, where)
-        if found is None:
-            return None
-        return self._adjust_result(env, found, where)
+    def _search_in(self, env, where):
+        progs = self.name
+        if isinstance(progs, str):
+            progs = [progs]
+        for prog in progs:
+            found = self._whereis(env, prog, where)
+            if found:
+                return self._adjust_result(env, (prog, found), where)
+        return None
 
-    def _apply(self, env):
+    def _search(self, env):
         for where in ('priority_path', 'path', 'fallback_path'):
-            found = self._search(env, where)
+            found = self._search_in(env, where)
             if found:
                 return found
         return None

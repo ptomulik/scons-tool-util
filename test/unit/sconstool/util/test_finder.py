@@ -224,7 +224,7 @@ class ToolFinderTests(unittest.TestCase):
 
     def _whereis_1(self, prog, path, pathext, reject):
         files = [ '/opt/bin/python', '/opt/bin/xyz',
-                  '/usr/bin/gcc', '/usr/bin/python',
+                  '/usr/bin/gcc', '/usr/bin/python', '/usr/bin/python3',
                   '/some/where/python', '/some/where/puppet']
         if path is None:
             path = '/usr/local/bin:/usr/bin'
@@ -247,10 +247,10 @@ class ToolFinderTests(unittest.TestCase):
         env = self._env_1()
 
         find = finder_.ToolFinder('gcc')
-        self.assertEqual(find._adjust_result(env, '/usr/bin/gcc', 'path'), 'gcc')
+        self.assertEqual(find._adjust_result(env, ('gcc', '/usr/bin/gcc'), 'path'), 'gcc')
 
         find = finder_.ToolFinder('gcc', strip_path=False)
-        self.assertEqual(find._adjust_result(env, '/usr/bin/gcc', 'path'), '/usr/bin/gcc')
+        self.assertEqual(find._adjust_result(env, ('gcc', '/usr/bin/gcc'), 'path'), '/usr/bin/gcc')
 
     def test__adjust_result__extra_paths(self):
         env = self._env_1()
@@ -259,15 +259,15 @@ class ToolFinderTests(unittest.TestCase):
         fp = '/some/local/where:/some/where'
 
         find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._adjust_result(env, '/opt/bin/python', 'priority_path'), '/opt/bin/python')
-        self.assertEqual(find._adjust_result(env, '/usr/bin/python', 'path'), 'python')
-        self.assertEqual(find._adjust_result(env, '/some/where/python', 'fallback_path'), '/some/where/python')
+        self.assertEqual(find._adjust_result(env, ('python', '/opt/bin/python'), 'priority_path'), '/opt/bin/python')
+        self.assertEqual(find._adjust_result(env, ('python', '/usr/bin/python'), 'path'), 'python')
+        self.assertEqual(find._adjust_result(env, ('python', '/some/where/python'), 'fallback_path'), '/some/where/python')
 
         find = finder_.ToolFinder('python', priority_path=pp, strip_path=False,
                                   strip_priority_path=True, strip_fallback_path=True)
-        self.assertEqual(find._adjust_result(env, '/opt/bin/python', 'priority_path'), 'python')
-        self.assertEqual(find._adjust_result(env, '/usr/bin/python', 'path'), '/usr/bin/python')
-        self.assertEqual(find._adjust_result(env, '/some/where/python', 'fallback_path'), 'python')
+        self.assertEqual(find._adjust_result(env, ('python', '/opt/bin/python'), 'priority_path'), 'python')
+        self.assertEqual(find._adjust_result(env, ('python', '/usr/bin/python'), 'path'), '/usr/bin/python')
+        self.assertEqual(find._adjust_result(env, ('python', '/some/where/python'), 'fallback_path'), 'python')
 
     def test__adjust_result__absname__strip(self):
         env = self._env_1()
@@ -275,9 +275,37 @@ class ToolFinderTests(unittest.TestCase):
         find = finder_.ToolFinder('python', name='/foo/bar/python', strip_path=True,
                                   strip_priority_path=True, strip_fallback_path=True)
         # absolute path given as *name* is over the strip_* settings
-        self.assertEqual(find._adjust_result(env, '/opt/bin/python', 'priority_path'), '/foo/bar/python')
-        self.assertEqual(find._adjust_result(env, '/usr/bin/python', 'path'), '/foo/bar/python')
-        self.assertEqual(find._adjust_result(env, '/some/where/python', 'fallback_path'), '/foo/bar/python')
+        self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/opt/bin/python'), 'priority_path'), '/foo/bar/python')
+        self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/usr/bin/python'), 'path'), '/foo/bar/python')
+        self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/some/where/python'), 'fallback_path'), '/foo/bar/python')
+
+    def test__search_in(self):
+        env = self._env_1()
+
+        pp = '/opt/local/bin:/opt/bin'
+        fp = '/some/local/where:/some/where'
+
+        find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
+        self.assertEqual(find._search_in(env, 'priority_path'), '/opt/bin/python')
+        self.assertEqual(find._search_in(env, 'path'), 'python')
+        self.assertEqual(find._search_in(env, 'fallback_path'), '/some/where/python')
+
+        find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp, strip_path=False,
+                                  strip_priority_path=True, strip_fallback_path=True)
+        self.assertEqual(find._search_in(env, 'priority_path'), 'python')
+        self.assertEqual(find._search_in(env, 'path'), '/usr/bin/python')
+        self.assertEqual(find._search_in(env, 'fallback_path'), 'python')
+
+    def test__search_in__multiple_names(self):
+        env = self._env_1()
+
+        pp = '/opt/local/bin:/opt/bin'
+        fp = '/some/local/where:/some/where'
+
+        find = finder_.ToolFinder('python', name=['python3', 'python'], priority_path=pp, fallback_path=fp)
+        self.assertEqual(find._search_in(env, 'priority_path'), '/opt/bin/python')
+        self.assertEqual(find._search_in(env, 'path'), 'python3')
+        self.assertEqual(find._search_in(env, 'fallback_path'), '/some/where/python')
 
     def test__search(self):
         env = self._env_1()
@@ -286,47 +314,30 @@ class ToolFinderTests(unittest.TestCase):
         fp = '/some/local/where:/some/where'
 
         find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._search(env, 'priority_path'), '/opt/bin/python')
-        self.assertEqual(find._search(env, 'path'), 'python')
-        self.assertEqual(find._search(env, 'fallback_path'), '/some/where/python')
-
-        find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp, strip_path=False,
-                                  strip_priority_path=True, strip_fallback_path=True)
-        self.assertEqual(find._search(env, 'priority_path'), 'python')
-        self.assertEqual(find._search(env, 'path'), '/usr/bin/python')
-        self.assertEqual(find._search(env, 'fallback_path'), 'python')
-
-    def test__apply(self):
-        env = self._env_1()
-
-        pp = '/opt/local/bin:/opt/bin'
-        fp = '/some/local/where:/some/where'
-
-        find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._apply(env), '/opt/bin/python')
+        self.assertEqual(find._search(env), '/opt/bin/python')
 
         find = finder_.ToolFinder('gcc', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._apply(env), 'gcc')
+        self.assertEqual(find._search(env), 'gcc')
 
         find = finder_.ToolFinder('gcc', strip_path=False, priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._apply(env), '/usr/bin/gcc')
+        self.assertEqual(find._search(env), '/usr/bin/gcc')
 
         find = finder_.ToolFinder('puppet', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._apply(env), '/some/where/puppet')
+        self.assertEqual(find._search(env), '/some/where/puppet')
 
         find = finder_.ToolFinder('puppet', strip_fallback_path=True, priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._apply(env), 'puppet')
+        self.assertEqual(find._search(env), 'puppet')
 
         find = finder_.ToolFinder('inexistent')
-        self.assertIsNone(find._apply(env))
+        self.assertIsNone(find._search(env))
 
     def test__call(self):
         env = self._env_1()
-        # We've already tested _apply...
-        with mock.patch.object(finder_.ToolFinder, '_apply', return_value='ok') as _apply:
+        # We've already tested _search...
+        with mock.patch.object(finder_.ToolFinder, '_search', return_value='ok') as _search:
             find = finder_.ToolFinder('foo')
             self.assertEqual(find(env), 'ok')
-            _apply.assert_called_once_with(env)
+            _search.assert_called_once_with(env)
 
 
 if __name__ == '__main__':
