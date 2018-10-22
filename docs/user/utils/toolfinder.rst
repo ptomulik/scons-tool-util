@@ -79,30 +79,8 @@ with ``strip_priority_path`` and ``strip_fallback_path``, respectively
    # Will return 'python', instead of '/home/user/.local/bin/python'
    python = ToolFinder('python', priority_path=['/home/user/.local/bin'],
                                  strip_priority_path=True)
-   python(env)
+   prog = python(env)
 
-:class:`.ToolFinder` is able to automatically bind parameters ``name``,
-``priority_path``, and ``fallback_path`` to prescribed construction
-variables, instead of assigning them fixed values. This feature may be enabled
-with ``use_vars``, ``use_name_var``, ``use_priority_path_var``,
-``use_fallback_path_var``.
-
-.. code-block:: python
-
-   python = ToolFinder('python', use_vars=True)
-   python.name             # -> '$PYTHONNAME'
-   python.priority_path    # -> '$PYTHONPRIORITYPATH'
-   python.fallback_path    # -> '$PYTHONFALLBACKPATH'
-
-The variable names are generated from :attr:`templates<.ToolFinder.templates>`,
-which can be customized as well. For example, we can pickup another variable
-for the ``priority_path``
-
-.. code-block:: python
-
-   python = ToolFinder('python', use_vars=True,
-                       templates={'priority_path': '$%(TOOL)sBINPATH'})
-   python.priority_path    # -> '$PYTHONBINPATH'
 
 Examples
 --------

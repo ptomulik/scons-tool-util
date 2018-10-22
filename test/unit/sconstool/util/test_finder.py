@@ -35,26 +35,12 @@ class ToolFinderTests(unittest.TestCase):
                     'reject',
                     'priority_path',
                     'fallback_path',
-                    'use_vars',
-                    'use_name_var',
-                    'use_priority_path_var',
-                    'use_fallback_path_var',
                     'strip_path',
                     'strip_priority_path',
-                    'strip_fallback_path',
-                    'templates')
-
-    _default_templates = {
-        'name':          '$%(TOOL)sNAME',
-        'priority_path': '$%(TOOL)sPRIORITYPATH',
-        'fallback_path': '$%(TOOL)sFALLBACKPATH',
-    }
+                    'strip_fallback_path')
 
     def test__ctor_kwargs(self):
         self.assertEqual(finder_.ToolFinder._ctor_kwargs, self._ctor_kwargs)
-
-    def test__default_templates(self):
-        self.assertEqual(finder_.ToolFinder._default_templates, self._default_templates)
 
     def test__init(self):
         with mock.patch('sconstool.util.misc_.check_kwargs') as check_kwargs:
@@ -63,7 +49,6 @@ class ToolFinderTests(unittest.TestCase):
             check_kwargs.assert_called_once_with('ToolFinder()', kw, self._ctor_kwargs)
             self.assertEqual(w._tool, 'xxx')
             self.assertEqual(w._kw, kw)
-            self.assertEqual(w._templates, w._default_templates)
 
     def test__tool(self):
         w = finder_.ToolFinder('xxx')
@@ -78,20 +63,6 @@ class ToolFinderTests(unittest.TestCase):
         w = finder_.ToolFinder('xxx')
         self.assertEqual(w.default_name, 'xxx')
 
-    def test__default_name___use_name_var(self):
-        w = finder_.ToolFinder('xxx', use_name_var=True)
-        self.assertEqual(w.default_name, '$XXXNAME')
-
-    def test__default_name___use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertEqual(w.default_name, '$XXXNAME')
-
-    def test__default_name___use_vars_and_use_name_var(self):
-        w = finder_.ToolFinder('xxx', use_vars=False, use_name_var=True)
-        self.assertEqual(w.default_name, '$XXXNAME')
-        w = finder_.ToolFinder('xxx', use_vars=True, use_name_var=False)
-        self.assertEqual(w.default_name, 'xxx')
-
     def test__name(self):
         w = finder_.ToolFinder('xxx', name='yyy')
         self.assertEqual(w.name, 'yyy')
@@ -103,14 +74,6 @@ class ToolFinderTests(unittest.TestCase):
     def test__name__default(self):
         w = finder_.ToolFinder('xxx')
         self.assertEqual(w.name, 'xxx')
-
-    def test__name___use_name_var(self):
-        w = finder_.ToolFinder('xxx', name='yyy', use_name_var=True)
-        self.assertEqual(w.name, 'yyy')
-
-    def test__name__default_with_name_var(self):
-        w = finder_.ToolFinder('xxx', use_name_var=True)
-        self.assertEqual(w.name, "$XXXNAME")
 
     def test__name__setter(self):
         with self.assertRaises(AttributeError) as context:
@@ -172,20 +135,6 @@ class ToolFinderTests(unittest.TestCase):
         w = finder_.ToolFinder('xxx')
         self.assertEqual(w.default_priority_path, [])
 
-    def test__default_priority_path__use_priority_path_var(self):
-        w = finder_.ToolFinder('xxx', use_priority_path_var=True)
-        self.assertEqual(w.default_priority_path, '$XXXPRIORITYPATH')
-
-    def test__default_priority_path__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertEqual(w.default_priority_path, '$XXXPRIORITYPATH')
-
-    def test__default_priority_path__use_priority_path_var_and_use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=False, use_priority_path_var=True)
-        self.assertEqual(w.default_priority_path, '$XXXPRIORITYPATH')
-        w = finder_.ToolFinder('xxx', use_vars=True, use_priority_path_var=False)
-        self.assertEqual(w.default_priority_path, [])
-
     def test__default_priority_path__setter(self):
         with self.assertRaises(AttributeError) as context:
             finder_.ToolFinder('xxx').default_priority_path = ''
@@ -212,20 +161,6 @@ class ToolFinderTests(unittest.TestCase):
         w = finder_.ToolFinder('xxx')
         self.assertEqual(w.default_fallback_path, [])
 
-    def test__default_fallback_path__use_fallback_path_var(self):
-        w = finder_.ToolFinder('xxx', use_fallback_path_var=True)
-        self.assertEqual(w.default_fallback_path, '$XXXFALLBACKPATH')
-
-    def test__default_fallback_path__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertEqual(w.default_fallback_path, '$XXXFALLBACKPATH')
-
-    def test__default_fallback_path__use_fallback_path_var_and_use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=False, use_fallback_path_var=True)
-        self.assertEqual(w.default_fallback_path, '$XXXFALLBACKPATH')
-        w = finder_.ToolFinder('xxx', use_vars=True, use_fallback_path_var=False)
-        self.assertEqual(w.default_fallback_path, [])
-
     def test__default_fallback_path__setter(self):
         with self.assertRaises(AttributeError) as context:
             finder_.ToolFinder('xxx').default_fallback_path = ''
@@ -246,115 +181,6 @@ class ToolFinderTests(unittest.TestCase):
     def test__fallback_path__setter(self):
         with self.assertRaises(AttributeError) as context:
             finder_.ToolFinder('xxx').fallback_path = ''
-        self.assertEqual(str(context.exception), "can't set attribute")
-
-##    def test__name_var(self):
-##        w = finder_.ToolFinder('xxx')
-##        self.assertEqual(w.name_var, 'XXXNAME')
-##
-##    def test__name_var___template(self):
-##        w = finder_.ToolFinder('xxx', templates={'name': '%(tool)sYYY'})
-##        self.assertEqual(w.name_var, 'XXXYYY')
-##
-##    def test__name_var__setter(self):
-##        with self.assertRaises(AttributeError) as context:
-##            finder_.ToolFinder('xxx').name_var = True
-##        self.assertEqual(str(context.exception), "can't set attribute")
-##
-##    def test__priority_path_var(self):
-##        w = finder_.ToolFinder('xxx')
-##        self.assertEqual(w.priority_path_var, 'XXXPRIORITYPATH')
-##
-##    def test__priority_path_var___template(self):
-##        w = finder_.ToolFinder('xxx', templates={'priority_path': '%(tool)sYYY'})
-##        self.assertEqual(w.priority_path_var, 'XXXYYY')
-##
-##    def test__priority_path_var__setter(self):
-##        with self.assertRaises(AttributeError) as context:
-##            finder_.ToolFinder('xxx').priority_path_var = True
-##        self.assertEqual(str(context.exception), "can't set attribute")
-##
-##    def test__fallback_path_var(self):
-##        w = finder_.ToolFinder('xxx')
-##        self.assertEqual(w.fallback_path_var, 'XXXFALLBACKPATH')
-##
-##    def test__fallback_path_var___template(self):
-##        w = finder_.ToolFinder('xxx', templates={'fallback_path': '%(tool)sYYY'})
-##        self.assertEqual(w.fallback_path_var, 'XXXYYY')
-##
-##    def test__fallback_path_var__setter(self):
-##        with self.assertRaises(AttributeError) as context:
-##            finder_.ToolFinder('xxx').fallback_path_var = True
-##        self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertTrue(w.use_vars)
-
-    def test__use_vars__default(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertIsNone(w.use_vars)
-
-    def test__use_vars__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').use_vars = True
-        self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test__use_name_var(self):
-        w = finder_.ToolFinder('xxx', use_name_var=True)
-        self.assertTrue(w.use_name_var)
-
-    def test__use_name_var__default(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertIsNone(w.use_name_var)
-
-    def test__use_name_var__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').use_name_var = True
-        self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test__use_priority_path_var(self):
-        w = finder_.ToolFinder('xxx', use_priority_path_var=True)
-        self.assertTrue(w.use_priority_path_var)
-
-    def test__use_priority_path_var__default(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertIsNone(w.use_priority_path_var)
-
-    def test__use_priority_path_var__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').use_priority_path_var = True
-        self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test__use_fallback_path_var(self):
-        w = finder_.ToolFinder('xxx', use_fallback_path_var=True)
-        self.assertTrue(w.use_fallback_path_var)
-
-    def test__use_fallback_path_var__default(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertIsNone(w.use_fallback_path_var)
-
-    def test__use_fallback_path_var__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').use_fallback_path_var = True
-        self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test__templates(self):
-        templates = {'name' : 'N',
-                     'priority_path': 'PP',
-                     'fallback_path': 'FP',
-                     'foo': 'FOO'}
-        w = finder_.ToolFinder('xxx', templates=templates)
-        expected = dict(w._default_templates, name='N', priority_path='PP', fallback_path='FP')
-        self.assertEqual(w.templates, expected)
-
-    def test__templates__default(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w.templates, w._default_templates)
-
-    def test__templates__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').templates = '_'
         self.assertEqual(str(context.exception), "can't set attribute")
 
     def test__strip_path(self):
@@ -395,82 +221,6 @@ class ToolFinderTests(unittest.TestCase):
         with self.assertRaises(AttributeError) as context:
             finder_.ToolFinder('xxx').strip_fallback_path = True
         self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test___var_for__name(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._var_for('name'), '$XXXNAME')
-
-    def test___var_for__name__custom_template(self):
-        w = finder_.ToolFinder('xxx', templates={'name': '$%(tool)sYYY'})
-        self.assertEqual(w._var_for('name'), '$xxxYYY')
-
-    def test___var_for__priority_path(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._var_for('priority_path'), '$XXXPRIORITYPATH')
-
-    def test___var_for__priority_path__custom_template(self):
-        w = finder_.ToolFinder('xxx', templates={'priority_path': '$%(tool)sYYY'})
-        self.assertEqual(w._var_for('priority_path'), '$xxxYYY')
-
-    def test___var_for__fallback_path(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._var_for('fallback_path'), '$XXXFALLBACKPATH')
-
-    def test___var_for__fallback_path__custom_template(self):
-        w = finder_.ToolFinder('xxx', templates={'fallback_path': '$%(tool)sYYY'})
-        self.assertEqual(w._var_for('fallback_path'), '$xxxYYY')
-
-    def test___var_for__invalid(self):
-        w = finder_.ToolFinder('xxx')
-        with self.assertRaises(KeyError) as context:
-            w._var_for('invalid')
-        self.assertIn('invalid', str(context.exception))
-
-    def test__default_for__name(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._default_for('name', 'yyy'), 'yyy')
-
-    def test__default_for__name__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertEqual(w._default_for('name', 'yyy'), '$XXXNAME')
-
-    def test__default_for__name__use_name_var(self):
-        w = finder_.ToolFinder('xxx', use_name_var=True)
-        self.assertEqual(w._default_for('name', 'yyy'), '$XXXNAME')
-
-    def test__default_for__priority_path(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._default_for('priority_path', []), [])
-
-    def test__default_for__priority_path__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertEqual(w._default_for('priority_path', []), '$XXXPRIORITYPATH')
-
-    def test__default_for__priority_path__use_priority_path_var(self):
-        w = finder_.ToolFinder('xxx', use_priority_path_var=True)
-        self.assertEqual(w._default_for('priority_path', []), '$XXXPRIORITYPATH')
-
-    def test__default_for__fallback_path(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._default_for('fallback_path', []), [])
-
-    def test__default_for__fallback_path__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        self.assertEqual(w._default_for('fallback_path', []), '$XXXFALLBACKPATH')
-
-    def test__default_for__fallback_path__use_fallback_path_var(self):
-        w = finder_.ToolFinder('xxx', use_fallback_path_var=True)
-        self.assertEqual(w._default_for('fallback_path', []), '$XXXFALLBACKPATH')
-
-    def test__default_for__invalid(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w._default_for('invalid', 'fallback'), 'fallback')
-
-    def test__default_for__invalid__use_vars(self):
-        w = finder_.ToolFinder('xxx', use_vars=True)
-        with self.assertRaises(KeyError) as context:
-            w._default_for('invalid', 'fallback')
-        self.assertIn('invalid', str(context.exception))
 
     def _whereis_1(self, prog, path, pathext, reject):
         files = [ '/opt/bin/python', '/opt/bin/xyz',

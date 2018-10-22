@@ -25,20 +25,9 @@ class ToolFinder:
                     'reject',
                     'priority_path',
                     'fallback_path',
-                    'use_vars',
-                    'use_name_var',
-                    'use_priority_path_var',
-                    'use_fallback_path_var',
                     'strip_path',
                     'strip_priority_path',
-                    'strip_fallback_path',
-                    'templates')
-
-    _default_templates = {
-        'name':          '$%(TOOL)sNAME',
-        'priority_path': '$%(TOOL)sPRIORITYPATH',
-        'fallback_path': '$%(TOOL)sFALLBACKPATH',
-    }
+                    'strip_fallback_path')
 
     def __init__(self, tool, **kw):
         """
@@ -56,23 +45,6 @@ class ToolFinder:
             extra search path to be searched prior to :attr:`.path`,
         :keyword str,list fallback_path:
             extra search path to be searched after :attr:`.path`,
-        :keyword bool use_vars:
-            use supporting construction variables to generate :attr:`.name`,
-            :attr:`priority_path`, :attr:`fallback_path`,
-        :keyword bool use_name_var:
-            if ``True``, and **name** is not given, a supporting construction
-            variable will be used to provide :attr:`.default_name`,
-        :keyword bool use_priority_path_var:
-            if ``True``, and **priority_path** is not given, a supporting
-            construction variable will be used to provide
-            :attr:`.default_priority_path`,
-        :keyword bool use_fallback_path_var:
-            if ``True``, and **fallback_path** is not given, a supporting
-            construction variable will be used to provide
-            :attr:`.default_fallback_path`,
-        :keyword dict templates:
-            a dictionary of overrides for :attr:`.templates` used to generate
-            names of the supporting construction variables,
         :keyword bool strip_path:
             if ``True`` (default), the leading path, if it's in :attr:`path`
             list, will be stripped from the returned file path,
@@ -85,7 +57,6 @@ class ToolFinder:
         """
         self._tool = str(tool)
         misc_.check_kwargs('ToolFinder()', kw, self._ctor_kwargs)
-        self._init_templates(kw)
         self._kw = kw
 
     @property
@@ -102,7 +73,7 @@ class ToolFinder:
 
            :rtype: str
         """
-        return self._default_for('name', self.tool)
+        return self.tool
 
     @property
     def default_priority_path(self):
@@ -110,7 +81,7 @@ class ToolFinder:
 
            :rtype: str
         """
-        return self._default_for('priority_path', [])
+        return []
 
     @property
     def default_fallback_path(self):
@@ -118,17 +89,7 @@ class ToolFinder:
 
            :rtype: str
         """
-        return self._default_for('fallback_path', [])
-
-    @property
-    def templates(self):
-        """A dictionary of templates used to generate variable names for
-           :attr:`.default_name`, :attr:`.default_priority_path`, and
-           :attr:`.default_fallback_path`.
-
-           :rtype: dict
-        """
-        return self._templates
+        return []
 
     def __call__(self, env):
         """Performs the actual search.
@@ -144,29 +105,6 @@ class ToolFinder:
            :rtype: str
         """
         return self._apply(env)
-
-    def _init_templates(self, kw):
-        default = self._default_templates
-        target = default.copy()
-        try:
-            source = kw['templates']
-        except KeyError:
-            pass
-        else:
-            target.update({k: source[k] for k in source if k in default})
-            del kw['templates']
-        self._templates = target
-
-    def _var_for(self, what):
-        attrs = {k: getattr(self, k) for k in ('tool',)}
-        attrs.update({k.upper(): getattr(self, k).upper() for k in ('tool',)})
-        return (self._templates[what] % attrs)
-
-    def _default_for(self, what, fallback):
-        if self._kw.get('use_%s_var' % what, self._kw.get('use_vars')):
-            return self._var_for(what)
-        else:
-            return fallback
 
     def _whereis(self, env, where):
         path = getattr(self, where)
@@ -229,10 +167,6 @@ ToolFinder._add_ctor_arg_getter('fallback_path', smart=True, rtype='str,list')
 ToolFinder._add_ctor_arg_getter('path', rtype='str,list')
 ToolFinder._add_ctor_arg_getter('pathext', rtype='str,list')
 ToolFinder._add_ctor_arg_getter('reject', [], rtype='list')
-ToolFinder._add_ctor_arg_getter('use_vars', rtype='bool')
-ToolFinder._add_ctor_arg_getter('use_name_var', rtype='bool')
-ToolFinder._add_ctor_arg_getter('use_priority_path_var', rtype='bool')
-ToolFinder._add_ctor_arg_getter('use_fallback_path_var', rtype='bool')
 ToolFinder._add_ctor_arg_getter('strip_path', True, rtype='bool')
 ToolFinder._add_ctor_arg_getter('strip_priority_path', False, rtype='bool')
 ToolFinder._add_ctor_arg_getter('strip_fallback_path', False, rtype='bool')
