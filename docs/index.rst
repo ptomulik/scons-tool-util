@@ -15,9 +15,9 @@ Table of Contents
 .. toctree::
    :maxdepth: 1
 
-   user
-   developer
-   api
+   User documentation <user>
+   API documentation <api>
+   Developer notes <developer>
 
 Indices and tables
 ==================
