@@ -31,7 +31,7 @@ class ToolFinder:
         def exists(env):
             return env.get('FOO', foo(env))
     """
-    __slots__ = ('_tool', '_kw', '_templates')
+    __slots__ = ('_tool', '_kw')
 
     _ctor_kwargs = ('name',
                     'path',
