@@ -59,10 +59,6 @@ class ToolFinderTests(unittest.TestCase):
             finder_.ToolFinder('xxx').tool = 'yyy'
         self.assertEqual(str(context.exception), "can't set attribute")
 
-    def test__default_name(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w.default_name, 'xxx')
-
     def test__name(self):
         w = finder_.ToolFinder('xxx', name='yyy')
         self.assertEqual(w.name, 'yyy')
@@ -131,15 +127,6 @@ class ToolFinderTests(unittest.TestCase):
             finder_.ToolFinder('xxx').reject = ''
         self.assertEqual(str(context.exception), "can't set attribute")
 
-    def test__default_priority_path(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w.default_priority_path, [])
-
-    def test__default_priority_path__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').default_priority_path = ''
-        self.assertEqual(str(context.exception), "can't set attribute")
-
     def test__priority_path(self):
         w = finder_.ToolFinder('xxx', priority_path='yyy')
         self.assertEqual(w.priority_path, 'yyy')
@@ -155,15 +142,6 @@ class ToolFinderTests(unittest.TestCase):
     def test__priority_path__setter(self):
         with self.assertRaises(AttributeError) as context:
             finder_.ToolFinder('xxx').priority_path = ''
-        self.assertEqual(str(context.exception), "can't set attribute")
-
-    def test__default_fallback_path(self):
-        w = finder_.ToolFinder('xxx')
-        self.assertEqual(w.default_fallback_path, [])
-
-    def test__default_fallback_path__setter(self):
-        with self.assertRaises(AttributeError) as context:
-            finder_.ToolFinder('xxx').default_fallback_path = ''
         self.assertEqual(str(context.exception), "can't set attribute")
 
     def test__fallback_path(self):

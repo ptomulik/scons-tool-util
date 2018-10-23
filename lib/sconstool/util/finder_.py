@@ -82,30 +82,6 @@ class ToolFinder:
         """
         return self._tool
 
-    @property
-    def default_name(self):
-        """Default (base) name of the file being searched for.
-
-           :rtype: str
-        """
-        return self.tool
-
-    @property
-    def default_priority_path(self):
-        """Default value for :attr:`.priority_path`.
-
-           :rtype: str
-        """
-        return []
-
-    @property
-    def default_fallback_path(self):
-        """Default value for :attr:`.fallback_path`.
-
-           :rtype: str
-        """
-        return []
-
     def __call__(self, env):
         """Performs the actual search.
 
@@ -174,10 +150,10 @@ class ToolFinder:
 
 
 TF = ToolFinder
-TF._add_getter('name', TF.default_name, rtype='str')
-TF._add_getter('priority_path', TF.default_priority_path, rtype='str,list')
-TF._add_getter('fallback_path', TF.default_fallback_path, rtype='str,list')
+TF._add_getter('name', TF.tool, rtype='str')
 TF._add_getter('path', rtype='str,list')
+TF._add_getter('priority_path', [], rtype='str,list')
+TF._add_getter('fallback_path', [], rtype='str,list')
 TF._add_getter('pathext', rtype='str,list')
 TF._add_getter('reject', [], rtype='list')
 TF._add_getter('strip_path', True, rtype='bool')
