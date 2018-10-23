@@ -9,6 +9,23 @@ __all__ = ('add_ro_dict_property',
            'check_kwargs')
 
 
+def _dict_property_doc(locs, kw):
+    try:
+        tdoc = kw['doc']
+    except KeyError:
+        doc = None
+    else:
+        doc = tdoc % dict(locs, **kw)
+    return doc
+
+
+def _dict_property_fget(dictattr, key, default):
+    if callable(default):
+        return lambda obj, k=key: getattr(obj, dictattr).get(k, default(obj))
+    else:
+        return lambda obj, k=key: getattr(obj, dictattr).get(k, default)
+
+
 def add_ro_dict_property(cls, dictattr, attr, default=None, **kw):
     """Add to class **cls** a read-only property returning a predefined entry
        from a dict.
@@ -37,22 +54,10 @@ def add_ro_dict_property(cls, dictattr, attr, default=None, **kw):
     else:
         (attr, key) = attr  # assumed it's a tuple or alike
 
-    if callable(default):
-        def getter(obj, k=key):
-            return getattr(obj, dictattr).get(k, default(obj))
-    else:
-        def getter(obj, k=key):
-            return getattr(obj, dictattr).get(k, default)
-
-    try:
-        tdoc = kw['doc']
-    except KeyError:
-        doc = None
-    else:
-        locs = {k: v for k, v in locals().items()
-                if k not in ('tdoc', 'kw', 'getter')}
-        doc = tdoc % dict(locs, **kw)
-    setattr(cls, attr, property(getter, doc=doc))
+    fget = _dict_property_fget(dictattr, key, default)
+    locs = {k: v for k, v in locals().items() if k not in ('kw', 'fget')}
+    doc = _dict_property_doc(locs, kw)
+    setattr(cls, attr, property(fget, doc=doc))
 
 
 def ensure_kwarg_in(caller, key, allowed):
