@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Utility functions to automate (sub)module imports.
+"""Provides the :class:`.ToolFinder` class.
 """
 
 from . import misc_
