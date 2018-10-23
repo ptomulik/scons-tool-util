@@ -14,8 +14,22 @@ class ToolFinder:
 
     A single ToolFinder instance searches for a single file (program), for
     example a compiler executable or script interpreter. The constructor
-    accepts several options, for each option there is corresponding object
-    property (read-only) with the same name.
+    accepts several options, for each option there is corresponding
+    @property (read-only) with the same name.
+
+    :Example: Typical use in a tool module
+
+    .. code-block:: python
+
+        from sconstool.util import ToolFinder
+        foo = ToolFinder('foo')
+
+        def generate(env):
+            env.SetDefault(FOO=foo(env))
+            # ...
+
+        def exists(env):
+            return env.get('FOO', foo(env))
     """
     __slots__ = ('_tool', '_kw', '_templates')
 
@@ -33,8 +47,9 @@ class ToolFinder:
         """
         :param str tool:
             symbolic name of the tool,
-        :keyword str name:
+        :keyword str,list name:
             base name of the file (program name) being searched for,
+            may be a list of alternative program names,
         :keyword str,list path:
             search path to be used instead of the standard SCons PATH,
         :keyword str,list pathext:
@@ -95,13 +110,12 @@ class ToolFinder:
         """Performs the actual search.
 
            :param env:
-                a SCons environment, for which the tool is being prepared; the
-                environment provides construction variables and the
-                functionality of its ``WereIs()`` method,
+                a SCons environment; provides construction variables and the
+                ``env.WhereIs()`` method to the :class:`.ToolFinder`.
            :return:
-                depending on options chosen (at the object construction), a
-                name or a path to the file found. If file can't be found,
-                ``None`` is returned.
+                depending on options chosen at object creation, a name or a
+                path to the executable file found. If the program can't be
+                found, ``None`` is returned.
            :rtype: str
         """
         return self._search(env)
@@ -135,16 +149,10 @@ class ToolFinder:
         return None
 
     @classmethod
-    def _add_ctor_arg_getter(cls, attr, default=None, **kw):
-        if kw.get('smart'):
-            del kw['smart']
-            if default is None:
-                kw['defaultattr'] = 'default_%s' % attr
-            else:
-                kw['defaultattr'] = default
-
-            def default(obj, da=kw['defaultattr']):
-                return getattr(obj, da)
+    def _add_getter(cls, attr, default=None, **kw):
+        if isinstance(default, property):
+            default = default.fget
+            kw['defaultattr'] = default.__name__
 
             doc = """\
             The value of **%(attr)s** keyword argument passed in to the
@@ -165,15 +173,17 @@ class ToolFinder:
         misc_.add_ro_dict_property(cls, '_kw', attr, default, **kw)
 
 
-ToolFinder._add_ctor_arg_getter('name', smart=True, rtype='str')
-ToolFinder._add_ctor_arg_getter('priority_path', smart=True, rtype='str,list')
-ToolFinder._add_ctor_arg_getter('fallback_path', smart=True, rtype='str,list')
-ToolFinder._add_ctor_arg_getter('path', rtype='str,list')
-ToolFinder._add_ctor_arg_getter('pathext', rtype='str,list')
-ToolFinder._add_ctor_arg_getter('reject', [], rtype='list')
-ToolFinder._add_ctor_arg_getter('strip_path', True, rtype='bool')
-ToolFinder._add_ctor_arg_getter('strip_priority_path', False, rtype='bool')
-ToolFinder._add_ctor_arg_getter('strip_fallback_path', False, rtype='bool')
+TF = ToolFinder
+TF._add_getter('name', TF.default_name, rtype='str')
+TF._add_getter('priority_path', TF.default_priority_path, rtype='str,list')
+TF._add_getter('fallback_path', TF.default_fallback_path, rtype='str,list')
+TF._add_getter('path', rtype='str,list')
+TF._add_getter('pathext', rtype='str,list')
+TF._add_getter('reject', [], rtype='list')
+TF._add_getter('strip_path', True, rtype='bool')
+TF._add_getter('strip_priority_path', False, rtype='bool')
+TF._add_getter('strip_fallback_path', False, rtype='bool')
+del TF
 
 
 # Local Variables:
