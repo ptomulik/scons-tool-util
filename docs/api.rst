@@ -26,6 +26,7 @@ summary below provides links to a full documentation for each class.
 
 .. autosummary::
     :toctree: api/classes
+    :template: autosummary/class.rst
 
     ToolFinder
 
@@ -39,12 +40,14 @@ summary below provides links to a full documentation for each function.
 
 .. autosummary::
     :toctree: api/functions
+    :template: autosummary/function.rst
 
     add_ro_dict_property
     ensure_kwarg_in
     ensure_kwarg_not_in
     check_kwarg
     check_kwargs
+    import_all_from
 
 .. _scons-tool-util: https://github.com/ptomulik/scons-tool-util
 .. _PEP 420: https://www.python.org/dev/peps/pep-0420/
