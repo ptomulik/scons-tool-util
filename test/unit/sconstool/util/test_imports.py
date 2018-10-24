@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import unittest
+import sys
+if sys.version_info < (3,0):
+    import unittest2 as unittest
+else:
+    import unittest
 import types
 
 import sconstool.util.imports_ as imports_

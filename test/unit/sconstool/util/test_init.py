@@ -22,7 +22,11 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import unittest
+import sys
+if sys.version_info < (3,0):
+    import unittest2 as unittest
+else:
+    import unittest
 import sconstool.util as util
 import sconstool.util.misc_ as misc_
 import sconstool.util.finder_ as finder_

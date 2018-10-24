@@ -9,7 +9,7 @@ import os
 __all__ = ('ToolFinder',)
 
 
-class ToolFinder:
+class ToolFinder(object):
     """Callable object which helps searching for programs used by SCons tools.
 
     A single ToolFinder instance searches for a single file (program), for

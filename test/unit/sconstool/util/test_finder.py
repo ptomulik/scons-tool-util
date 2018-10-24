@@ -22,8 +22,13 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-import unittest
-import unittest.mock as mock
+import sys
+if sys.version_info < (3,0):
+    import unittest2 as unittest
+    import mock
+else:
+    import unittest
+    import unittest.mock as mock
 import sconstool.util.finder_ as finder_
 import sconstool.util.misc_ as misc_
 

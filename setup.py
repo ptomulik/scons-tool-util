@@ -4,10 +4,17 @@
 
 from setuptools import setup
 from os import path
+from sys import version_info
+
 
 here = path.abspath(path.dirname(__file__))
 
-with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
+if version_info < (3,0):
+    from io import open as uopen
+else:
+    uopen = open
+
+with uopen(path.join(here, 'README.rst'), encoding='utf-8') as f:
     readme = f.read()
 
 about = {}

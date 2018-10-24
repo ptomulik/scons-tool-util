@@ -35,6 +35,11 @@ if sys.platform == 'win32':
 else:
     test = TestSCons.TestSCons()
 
+if sys.version_info < (3,0):
+    from io import open as uopen
+else:
+    uopen = open
+
 if not test.where_is('iconv'):
     test.skip_test("Could not find 'iconv', skipping test(s).\n")
 
@@ -44,10 +49,10 @@ test.run()
 test.must_contain_all_lines(test.stdout(), ['iconv -f latin2 -t utf8 latin2.txt > utf8.txt'])
 
 test.must_exist('utf8.txt')
-with open(test.workpath('latin2.txt'), 'r', encoding='latin2') as f:
+with uopen(test.workpath('latin2.txt'), 'r', encoding='latin2') as f:
     latin2 = f.read()
 
-with open(test.workpath('utf8.txt'), 'r', encoding='utf8') as f:
+with uopen(test.workpath('utf8.txt'), 'r', encoding='utf8') as f:
     utf8 = f.read()
 test.must_contain_exactly_lines(utf8, latin2.splitlines())
 
