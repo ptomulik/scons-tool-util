@@ -32,13 +32,13 @@ or, if your project uses pipenv_:
 
 .. code-block:: shell
 
-      pipenv install --dev scons-tool-util
+      pipenv install scons-tool-util
 
 Alternativelly, you may add this to your ``Pipfile``
 
 .. code-block:: ini
 
-    [dev-packages]
+    [packages]
     scons-tool-util = "*"
 
 This will install a namespaced package ``sconstool.util`` in project's
