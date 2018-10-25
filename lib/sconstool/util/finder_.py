@@ -98,6 +98,9 @@ class ToolFinder(object):
 
     def _whereis(self, env, prog, where):
         path = getattr(self, where)
+        if path and not isinstance(path, str):
+            # this trick enables variable substitution in list entries
+            path = os.path.pathsep.join(path)
         return env.WhereIs(prog, path, self.pathext, self.reject)
 
     def _adjust_result(self, env, result, where):

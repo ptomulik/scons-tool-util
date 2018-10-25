@@ -67,10 +67,11 @@ class _Environment(UserDict):
         UserDict.__init__(self, *args, **kw)
 
     def subst(self, string):
-        t = Template(string)
-        # Well, it works slightly different than SCons.Environment.subst(),
-        # but is simple...
-        return t.safe_substitute(self)
+        new = Template(string).safe_substitute(self)
+        while new != string:
+            string = new
+            new = Template(string).safe_substitute(self)
+        return new
 
     def WhereIs(self, prog, path=None, pathext=None, reject=[]):
         if path is None:
@@ -326,7 +327,38 @@ class ToolFinderTests(unittest.TestCase):
         self.assertEqual(find._search_in(env, 'path'), 'python3')
         self.assertEqual(find._search_in(env, 'fallback_path'), _p('/some/where/python'))
 
-    ##def test__search_in__path_list(self):
+    def test__search_in__path_list(self):
+        env = _Environment()
+
+        pp = [_p('/opt/local/bin'), _p('/opt/bin')]
+        fp = [_p('/some/local/where'), _p('/some/where')]
+
+        find = finder_.ToolFinder('python', name=['python3', 'python'], priority_path=pp, fallback_path=fp)
+        self.assertEqual(find._search_in(env, 'priority_path'), _p('/opt/bin/python'))
+        self.assertEqual(find._search_in(env, 'path'), 'python3')
+        self.assertEqual(find._search_in(env, 'fallback_path'), _p('/some/where/python'))
+
+    def test__search_in__subst(self):
+        env = _Environment(OPTLOCAL=_p('$OPT/local/bin'), OPT=_p('/opt'), SOMELOCAL=_p('$SOME/local'), SOME=_p('/some'))
+
+        pp = os.path.pathsep.join([_p('$OPTLOCAL/bin'), _p('$OPT/bin')])
+        fp = os.path.pathsep.join([_p('$SOMELOCAL/where'), _p('$SOME/where')])
+
+        find = finder_.ToolFinder('python', name=['python3', 'python'], priority_path=pp, fallback_path=fp)
+        self.assertEqual(find._search_in(env, 'priority_path'), _p('/opt/bin/python'))
+        self.assertEqual(find._search_in(env, 'path'), 'python3')
+        self.assertEqual(find._search_in(env, 'fallback_path'), _p('/some/where/python'))
+
+    def test__search_in__path_list__subst(self):
+        env = _Environment(OPTLOCAL=_p('$OPT/local/bin'), OPT=_p('/opt'), SOMELOCAL=_p('$SOME/local'), SOME=_p('/some'))
+
+        pp = [_p('$OPTLOCAL/bin'), _p('$OPT/bin')]
+        fp = [_p('$SOMELOCAL/where'), _p('$SOME/where')]
+
+        find = finder_.ToolFinder('python', name=['python3', 'python'], priority_path=pp, fallback_path=fp)
+        self.assertEqual(find._search_in(env, 'priority_path'), _p('/opt/bin/python'))
+        self.assertEqual(find._search_in(env, 'path'), 'python3')
+        self.assertEqual(find._search_in(env, 'fallback_path'), _p('/some/where/python'))
 
     def test__search(self):
         env = _Environment()
