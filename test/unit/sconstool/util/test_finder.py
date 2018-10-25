@@ -32,6 +32,48 @@ else:
 import sconstool.util.finder_ as finder_
 import sconstool.util.misc_ as misc_
 
+try:
+    # python 2
+    from UserDict import UserDict
+except ImportError:
+    # python 3
+    from collections import UserDict
+from string import Template
+
+
+class _Environment(UserDict):
+    _default_existing_files = [
+        '/opt/bin/python',
+        '/opt/bin/xyz',
+        '/usr/bin/gcc',
+        '/usr/bin/python',
+        '/usr/bin/python3',
+        '/some/where/python',
+        '/some/where/puppet'
+    ]
+
+    def __init__(self, existing_files=None, **kw):
+        if existing_files is None:
+            existing_files = self._default_existing_files
+        self._existing_files = existing_files
+
+    def subst(self, string):
+        t = Template(string)
+        # Well, it works slightly different than SCons.Environment.subst(),
+        # but is simple...
+        return t.safe_substitute(self)
+
+    def WhereIs(self, prog, path=None, pathext=None, reject=[]):
+        if path is None:
+            path = '/usr/local/bin:/usr/bin'
+        if isinstance(path, str):
+            path = path.split(':')
+        for dir in path:
+            full = '/'.join([dir, prog])
+            if full in self._existing_files:
+                return full
+        return None
+
 
 class ToolFinderTests(unittest.TestCase):
     _ctor_kwargs = ('name',
@@ -205,29 +247,8 @@ class ToolFinderTests(unittest.TestCase):
             finder_.ToolFinder('xxx').strip_fallback_path = True
         self.assertEqual(str(context.exception), "can't set attribute")
 
-    def _whereis_1(self, prog, path, pathext, reject):
-        files = [ '/opt/bin/python', '/opt/bin/xyz',
-                  '/usr/bin/gcc', '/usr/bin/python', '/usr/bin/python3',
-                  '/some/where/python', '/some/where/puppet']
-        if path is None:
-            path = '/usr/local/bin:/usr/bin'
-        if isinstance(path, str):
-            path = path.split(':')
-        for dir in path:
-            full = '/'.join([dir, prog])
-            if full in files:
-                return full
-        return None
-
-    def _subst_1(self, s):
-        return s
-
-    def _env_1(self):
-        return mock.Mock(WhereIs=mock.Mock(side_effect=self._whereis_1),
-                         subst=mock.Mock(side_effect=self._subst_1))
-
     def test__adjust_result(self):
-        env = self._env_1()
+        env = _Environment()
 
         find = finder_.ToolFinder('gcc')
         self.assertEqual(find._adjust_result(env, ('gcc', '/usr/bin/gcc'), 'path'), 'gcc')
@@ -236,7 +257,7 @@ class ToolFinderTests(unittest.TestCase):
         self.assertEqual(find._adjust_result(env, ('gcc', '/usr/bin/gcc'), 'path'), '/usr/bin/gcc')
 
     def test__adjust_result__extra_paths(self):
-        env = self._env_1()
+        env = _Environment()
 
         pp = '/opt/local/bin:/opt/bin'
         fp = '/some/local/where:/some/where'
@@ -253,7 +274,7 @@ class ToolFinderTests(unittest.TestCase):
         self.assertEqual(find._adjust_result(env, ('python', '/some/where/python'), 'fallback_path'), 'python')
 
     def test__adjust_result__absname__strip(self):
-        env = self._env_1()
+        env = _Environment()
 
         find = finder_.ToolFinder('python', name='/foo/bar/python', strip_path=True,
                                   strip_priority_path=True, strip_fallback_path=True)
@@ -263,7 +284,7 @@ class ToolFinderTests(unittest.TestCase):
         self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/some/where/python'), 'fallback_path'), '/foo/bar/python')
 
     def test__search_in(self):
-        env = self._env_1()
+        env = _Environment()
 
         pp = '/opt/local/bin:/opt/bin'
         fp = '/some/local/where:/some/where'
@@ -280,7 +301,7 @@ class ToolFinderTests(unittest.TestCase):
         self.assertEqual(find._search_in(env, 'fallback_path'), 'python')
 
     def test__search_in__multiple_names(self):
-        env = self._env_1()
+        env = _Environment()
 
         pp = '/opt/local/bin:/opt/bin'
         fp = '/some/local/where:/some/where'
@@ -291,7 +312,7 @@ class ToolFinderTests(unittest.TestCase):
         self.assertEqual(find._search_in(env, 'fallback_path'), '/some/where/python')
 
     def test__search(self):
-        env = self._env_1()
+        env = _Environment()
 
         pp = '/opt/local/bin:/opt/bin'
         fp = '/some/local/where:/some/where'
@@ -315,7 +336,7 @@ class ToolFinderTests(unittest.TestCase):
         self.assertIsNone(find._search(env))
 
     def test__call(self):
-        env = self._env_1()
+        env = _Environment()
         # We've already tested _search...
         with mock.patch.object(finder_.ToolFinder, '_search', return_value='ok') as _search:
             find = finder_.ToolFinder('foo')
