@@ -14,11 +14,13 @@ if version_info < (3,0):
 else:
     uopen = open
 
-with uopen(path.join(here, 'README.rst'), encoding='utf-8') as f:
+readme_rst = path.join(here, 'README.rst')
+with uopen(readme_rst, encoding='utf-8') as f:
     readme = f.read()
 
 about = {}
-with open(path.join(here, 'lib', 'sconstool', 'util', 'about.py')) as f:
+about_py = path.join(here, 'lib', 'sconstool', 'util', 'about.py')
+with uopen(about_py, encoding='utf-8') as f:
     exec(f.read(), about)
 
 setup(
