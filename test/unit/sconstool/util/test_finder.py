@@ -23,6 +23,7 @@
 #
 
 import sys
+import os
 if sys.version_info < (3,0):
     import unittest2 as unittest
     import mock
@@ -41,21 +42,29 @@ except ImportError:
 from string import Template
 
 
+def _p(p):
+    pieces = p.split(r'/')
+    if sys.platform == 'win32' and pieces and not pieces[0]:
+        pieces[0] = 'C:'
+    return os.path.sep.join(pieces)
+
+
 class _Environment(UserDict):
     _default_existing_files = [
-        '/opt/bin/python',
-        '/opt/bin/xyz',
-        '/usr/bin/gcc',
-        '/usr/bin/python',
-        '/usr/bin/python3',
-        '/some/where/python',
-        '/some/where/puppet'
+        _p('/opt/bin/python'),
+        _p('/opt/bin/xyz'),
+        _p('/usr/bin/gcc'),
+        _p('/usr/bin/python'),
+        _p('/usr/bin/python3'),
+        _p('/some/where/python'),
+        _p('/some/where/puppet')
     ]
 
-    def __init__(self, existing_files=None, **kw):
+    def __init__(self, existing_files=None, *args, **kw):
         if existing_files is None:
             existing_files = self._default_existing_files
         self._existing_files = existing_files
+        UserDict.__init__(self, *args, **kw)
 
     def subst(self, string):
         t = Template(string)
@@ -65,11 +74,17 @@ class _Environment(UserDict):
 
     def WhereIs(self, prog, path=None, pathext=None, reject=[]):
         if path is None:
-            path = '/usr/local/bin:/usr/bin'
-        if isinstance(path, str):
-            path = path.split(':')
+            path = [_p('/usr/local/bin'), _p('/usr/bin')]
+        elif isinstance(path, str):
+            path = self.subst(path).split(os.path.pathsep)
+
+        if pathext is None:
+            pathext = self.get('ENV', dict()).get('PATHEXT')
+        elif isinstance(pathext, str):
+            pathext = self.subst(pathext)
+
         for dir in path:
-            full = '/'.join([dir, prog])
+            full = os.path.join(dir, prog)
             if full in self._existing_files:
                 return full
         return None
@@ -251,83 +266,85 @@ class ToolFinderTests(unittest.TestCase):
         env = _Environment()
 
         find = finder_.ToolFinder('gcc')
-        self.assertEqual(find._adjust_result(env, ('gcc', '/usr/bin/gcc'), 'path'), 'gcc')
+        self.assertEqual(find._adjust_result(env, ('gcc', _p('/usr/bin/gcc')), 'path'), 'gcc')
 
         find = finder_.ToolFinder('gcc', strip_path=False)
-        self.assertEqual(find._adjust_result(env, ('gcc', '/usr/bin/gcc'), 'path'), '/usr/bin/gcc')
+        self.assertEqual(find._adjust_result(env, ('gcc', _p('/usr/bin/gcc')), 'path'), _p('/usr/bin/gcc'))
 
     def test__adjust_result__extra_paths(self):
         env = _Environment()
 
-        pp = '/opt/local/bin:/opt/bin'
-        fp = '/some/local/where:/some/where'
+        pp = os.path.pathsep.join([_p('/opt/local/bin'), _p('/opt/bin')])
+        fp = os.path.pathsep.join([_p('/some/local/where'), _p('/some/where')])
 
         find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._adjust_result(env, ('python', '/opt/bin/python'), 'priority_path'), '/opt/bin/python')
-        self.assertEqual(find._adjust_result(env, ('python', '/usr/bin/python'), 'path'), 'python')
-        self.assertEqual(find._adjust_result(env, ('python', '/some/where/python'), 'fallback_path'), '/some/where/python')
+        self.assertEqual(find._adjust_result(env, ('python', _p('/opt/bin/python')), 'priority_path'), _p('/opt/bin/python'))
+        self.assertEqual(find._adjust_result(env, ('python', _p('/usr/bin/python')), 'path'), 'python')
+        self.assertEqual(find._adjust_result(env, ('python', _p('/some/where/python')), 'fallback_path'), _p('/some/where/python'))
 
         find = finder_.ToolFinder('python', priority_path=pp, strip_path=False,
                                   strip_priority_path=True, strip_fallback_path=True)
-        self.assertEqual(find._adjust_result(env, ('python', '/opt/bin/python'), 'priority_path'), 'python')
-        self.assertEqual(find._adjust_result(env, ('python', '/usr/bin/python'), 'path'), '/usr/bin/python')
-        self.assertEqual(find._adjust_result(env, ('python', '/some/where/python'), 'fallback_path'), 'python')
+        self.assertEqual(find._adjust_result(env, ('python', _p('/opt/bin/python')), 'priority_path'), 'python')
+        self.assertEqual(find._adjust_result(env, ('python', _p('/usr/bin/python')), 'path'), _p('/usr/bin/python'))
+        self.assertEqual(find._adjust_result(env, ('python', _p('/some/where/python')), 'fallback_path'), 'python')
 
     def test__adjust_result__absname__strip(self):
         env = _Environment()
 
-        find = finder_.ToolFinder('python', name='/foo/bar/python', strip_path=True,
+        find = finder_.ToolFinder('python', name=_p('/foo/bar/python'), strip_path=True,
                                   strip_priority_path=True, strip_fallback_path=True)
         # absolute path given as *name* is over the strip_* settings
-        self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/opt/bin/python'), 'priority_path'), '/foo/bar/python')
-        self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/usr/bin/python'), 'path'), '/foo/bar/python')
-        self.assertEqual(find._adjust_result(env, ('/foo/bar/python', '/some/where/python'), 'fallback_path'), '/foo/bar/python')
+        self.assertEqual(find._adjust_result(env, (_p('/foo/bar/python'), _p('/opt/bin/python')), 'priority_path'), _p('/foo/bar/python'))
+        self.assertEqual(find._adjust_result(env, (_p('/foo/bar/python'), _p('/usr/bin/python')), 'path'), _p('/foo/bar/python'))
+        self.assertEqual(find._adjust_result(env, (_p('/foo/bar/python'), _p('/some/where/python')), 'fallback_path'), _p('/foo/bar/python'))
 
     def test__search_in(self):
         env = _Environment()
 
-        pp = '/opt/local/bin:/opt/bin'
-        fp = '/some/local/where:/some/where'
+        pp = os.path.pathsep.join([_p('/opt/local/bin'), _p('/opt/bin')])
+        fp = os.path.pathsep.join([_p('/some/local/where'), _p('/some/where')])
 
         find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._search_in(env, 'priority_path'), '/opt/bin/python')
+        self.assertEqual(find._search_in(env, 'priority_path'), _p('/opt/bin/python'))
         self.assertEqual(find._search_in(env, 'path'), 'python')
-        self.assertEqual(find._search_in(env, 'fallback_path'), '/some/where/python')
+        self.assertEqual(find._search_in(env, 'fallback_path'), _p('/some/where/python'))
 
         find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp, strip_path=False,
                                   strip_priority_path=True, strip_fallback_path=True)
         self.assertEqual(find._search_in(env, 'priority_path'), 'python')
-        self.assertEqual(find._search_in(env, 'path'), '/usr/bin/python')
+        self.assertEqual(find._search_in(env, 'path'), _p('/usr/bin/python'))
         self.assertEqual(find._search_in(env, 'fallback_path'), 'python')
 
     def test__search_in__multiple_names(self):
         env = _Environment()
 
-        pp = '/opt/local/bin:/opt/bin'
-        fp = '/some/local/where:/some/where'
+        pp = os.path.pathsep.join([_p('/opt/local/bin'), _p('/opt/bin')])
+        fp = os.path.pathsep.join([_p('/some/local/where'), _p('/some/where')])
 
         find = finder_.ToolFinder('python', name=['python3', 'python'], priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._search_in(env, 'priority_path'), '/opt/bin/python')
+        self.assertEqual(find._search_in(env, 'priority_path'), _p('/opt/bin/python'))
         self.assertEqual(find._search_in(env, 'path'), 'python3')
-        self.assertEqual(find._search_in(env, 'fallback_path'), '/some/where/python')
+        self.assertEqual(find._search_in(env, 'fallback_path'), _p('/some/where/python'))
+
+    ##def test__search_in__path_list(self):
 
     def test__search(self):
         env = _Environment()
 
-        pp = '/opt/local/bin:/opt/bin'
-        fp = '/some/local/where:/some/where'
+        pp = os.path.pathsep.join([_p('/opt/local/bin'), _p('/opt/bin')])
+        fp = os.path.pathsep.join([_p('/some/local/where'), _p('/some/where')])
 
         find = finder_.ToolFinder('python', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._search(env), '/opt/bin/python')
+        self.assertEqual(find._search(env), _p('/opt/bin/python'))
 
         find = finder_.ToolFinder('gcc', priority_path=pp, fallback_path=fp)
         self.assertEqual(find._search(env), 'gcc')
 
         find = finder_.ToolFinder('gcc', strip_path=False, priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._search(env), '/usr/bin/gcc')
+        self.assertEqual(find._search(env), _p('/usr/bin/gcc'))
 
         find = finder_.ToolFinder('puppet', priority_path=pp, fallback_path=fp)
-        self.assertEqual(find._search(env), '/some/where/puppet')
+        self.assertEqual(find._search(env), _p('/some/where/puppet'))
 
         find = finder_.ToolFinder('puppet', strip_fallback_path=True, priority_path=pp, fallback_path=fp)
         self.assertEqual(find._search(env), 'puppet')
