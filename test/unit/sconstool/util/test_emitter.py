@@ -75,11 +75,21 @@ class ConditionalEmitterTests(unittest.TestCase):
         self.assertEqual(str(context.exception), "predicate must be callable")
 
     def test__init__(self):
-        def pred(): return True
+        def pred(): pass
         em = emitter_.ConditionalEmitter(pred)
         self.assertIs(em.predicate, pred)
         self.assertIs(em.emitter_if.__code__, em.default_emitter.__code__)
         self.assertIs(em.emitter_else.__code__, em.default_emitter.__code__)
+
+    def test__default_emitter(self):
+        def pred(): pass
+        em = emitter_.ConditionalEmitter(pred)
+        target = mock.Mock()
+        source = mock.Mock()
+        env = mock.Mock()
+        (t, s) = em.default_emitter(target, source, env)
+        self.assertIs(t, target)
+        self.assertIs(s, source)
 
     def test__call__(self):
         def src_suffix_in(target, source, env):
