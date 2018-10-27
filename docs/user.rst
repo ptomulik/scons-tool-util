@@ -16,6 +16,8 @@ Utilities
    :maxdepth: 1
 
    user/utils/toolfinder
+   user/utils/conditionalemitter
+   user/utils/srcsuffixcapturingemitter
 
 .. _SCons: https://scons.org/
 .. _SCons Tool Utilities: https://github.com/ptomulik/scons-tool-util/

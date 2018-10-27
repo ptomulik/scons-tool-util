@@ -20,7 +20,7 @@ with uopen(readme_rst, encoding='utf-8') as f:
 
 about = {}
 about_py = path.join(here, 'lib', 'sconstool', 'util', 'about.py')
-with uopen(about_py, encoding='utf-8') as f:
+with open(about_py) as f:
     exec(f.read(), about)
 
 setup(

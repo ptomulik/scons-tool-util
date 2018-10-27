@@ -30,6 +30,7 @@ else:
 import sconstool.util as util
 import sconstool.util.misc_ as misc_
 import sconstool.util.finder_ as finder_
+import sconstool.util.emitter_ as emitter_
 
 
 class package_symbols_Tests(unittest.TestCase):
@@ -42,6 +43,9 @@ class package_symbols_Tests(unittest.TestCase):
 
     def test_finder_(self):
         self.assertIs(util.ToolFinder, finder_.ToolFinder)
+
+    def test_emitter_(self):
+        self.assertIs(util.SrcSuffixCapturingEmitter, emitter_.SrcSuffixCapturingEmitter)
 
 
 if __name__ == '__main__':

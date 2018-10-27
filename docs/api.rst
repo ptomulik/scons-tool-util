@@ -29,6 +29,8 @@ summary below provides links to a full documentation for each class.
     :template: autosummary/class.rst
 
     ToolFinder
+    ConditionalEmitter
+    SrcSuffixCapturingEmitter
 
 .. _Functions:
 
