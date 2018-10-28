@@ -10,7 +10,8 @@ __all__ = imports_.__all__
 import_all_from(__package__, [
     '.misc_',
     '.finder_',
-    '.emitter_'
+    '.emitter_',
+    '.selector_'
 ])
 
 # Local Variables:

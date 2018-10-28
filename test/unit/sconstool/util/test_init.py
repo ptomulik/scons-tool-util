@@ -31,6 +31,7 @@ import sconstool.util as util
 import sconstool.util.misc_ as misc_
 import sconstool.util.finder_ as finder_
 import sconstool.util.emitter_ as emitter_
+import sconstool.util.selector_ as selector_
 
 
 class package_symbols_Tests(unittest.TestCase):
@@ -46,6 +47,9 @@ class package_symbols_Tests(unittest.TestCase):
 
     def test_emitter_(self):
         self.assertIs(util.ConditionalEmitter, emitter_.ConditionalEmitter)
+
+    def test_selector_(self):
+        self.assertIs(util.Selector, selector_.Selector)
 
 
 if __name__ == '__main__':

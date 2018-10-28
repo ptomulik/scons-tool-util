@@ -30,6 +30,7 @@ summary below provides links to a full documentation for each class.
 
     ToolFinder
     ConditionalEmitter
+    Selector
 
 .. _Functions:
 

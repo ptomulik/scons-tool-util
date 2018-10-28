@@ -10,7 +10,7 @@ __all__ = ('ToolFinder',)
 
 
 class ToolFinder(object):
-    """Callable object which helps searching for programs used by SCons tools.
+    """Callable object which searches for executables.
 
     A single ToolFinder instance searches for a single file (program), for
     example a compiler executable or script interpreter. The constructor

@@ -24,22 +24,16 @@
 
 import sys
 import os
-if sys.version_info < (3,0):
+from string import Template
+if sys.version_info < (3, 0):
     import unittest2 as unittest
     import mock
 else:
     import unittest
     import unittest.mock as mock
+
 import sconstool.util.finder_ as finder_
 import sconstool.util.misc_ as misc_
-
-try:
-    # python 2
-    from UserDict import UserDict
-except ImportError:
-    # python 3
-    from collections import UserDict
-from string import Template
 
 
 def _p(p):
@@ -49,7 +43,7 @@ def _p(p):
     return os.path.sep.join(pieces)
 
 
-class _Environment(UserDict):
+class _Environment(dict):
     _default_existing_files = [
         _p('/opt/bin/python'),
         _p('/opt/bin/xyz'),
@@ -64,7 +58,7 @@ class _Environment(UserDict):
         if existing_files is None:
             existing_files = self._default_existing_files
         self._existing_files = existing_files
-        UserDict.__init__(self, *args, **kw)
+        dict.__init__(self, *args, **kw)
 
     def subst(self, string):
         new = Template(string).safe_substitute(self)

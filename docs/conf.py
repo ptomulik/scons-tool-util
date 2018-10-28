@@ -28,8 +28,8 @@ with open(os.path.join(topdir, 'lib', 'sconstool', 'util', 'about.py')) as f:
 # -- Project information -----------------------------------------------------
 
 project = 'scons-tool-util'
-copyright = '2018, Paweł Tomulik'
-author = 'Paweł Tomulik'
+copyright = u'2018, Paweł Tomulik'
+author = u'Paweł Tomulik'
 
 # The short X.Y version
 version = ''
@@ -158,7 +158,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'scons-tool-util.tex', 'scons-tool-util Documentation',
-     'Paweł Tomulik', 'manual'),
+     u'Paweł Tomulik', 'manual'),
 ]
 
 

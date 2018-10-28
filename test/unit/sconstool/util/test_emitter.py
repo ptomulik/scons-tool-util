@@ -31,15 +31,6 @@ else:
     import unittest
     import unittest.mock as mock
 import sconstool.util.emitter_ as emitter_
-import sconstool.util.misc_ as misc_
-
-try:
-    # python 2
-    from UserDict import UserDict
-except ImportError:
-    # python 3
-    from collections import UserDict
-from string import Template
 
 
 class _Node(object):
