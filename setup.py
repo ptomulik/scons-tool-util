@@ -9,7 +9,7 @@ from sys import version_info
 
 here = path.abspath(path.dirname(__file__))
 
-if version_info < (3,0):
+if version_info < (3, 0):
     from io import open as uopen
 else:
     uopen = open

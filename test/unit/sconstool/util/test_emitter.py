@@ -42,24 +42,6 @@ except ImportError:
 from string import Template
 
 
-def _p(p):
-    pieces = p.split(r'/')
-    if sys.platform == 'win32' and pieces and not pieces[0]:
-        pieces[0] = 'C:'
-    return os.path.sep.join(pieces)
-
-
-class _Environment(UserDict):
-    def __init__(self, *args, **kw):
-        UserDict.__init__(self, *args, **kw)
-
-    def subst(self, string):
-        new = Template(string).safe_substitute(self)
-        while new != string:
-            string = new
-            new = Template(string).safe_substitute(self)
-        return new
-
 class _Node(object):
     def __init__(self, path):
         self.path = path
@@ -97,7 +79,7 @@ class ConditionalEmitterTests(unittest.TestCase):
         def suffix_out(target, source, env):
             return str(target[0]).endswith('.out')
 
-        env = _Environment()
+        env = mock.Mock()
         file_out = [_Node('file.out')]
         file_in = [_Node('file.in')]
         file_xx = [_Node('file.xx')]
@@ -129,65 +111,6 @@ class ConditionalEmitterTests(unittest.TestCase):
         self.assertEqual(em(file_xx, file_in, env), 'emitter_else')
         em_if.assert_not_called()
         em_else.assert_called_once_with(file_xx, file_in, env)
-
-
-class SrcSuffixCapturingEmitterTest(unittest.TestCase):
-
-    def test__subclass_of_ConditionalEmitter(self):
-        self.assertTrue(issubclass(emitter_.SrcSuffixCapturingEmitter, emitter_.ConditionalEmitter))
-
-    def test__init__(self):
-        def emitter(): pass
-        def fallback(): pass
-        em = emitter_.SrcSuffixCapturingEmitter('.xx', emitter, fallback)
-        self.assertEqual(em.src_suffix, '.xx')
-        self.assertIs(em.emitter_if, emitter)
-        self.assertIs(em.emitter_else, fallback)
-        self.assertIs(em.predicate.__code__, em.match_src_suffix.__code__)
-
-    def test__match_src_suffix(self):
-        def emitter(): pass
-
-        env = _Environment()
-        file_out = [_Node('file.out')]
-        file_in = [_Node('file.in')]
-        file_xx = [_Node('file.xx')]
-
-        em = emitter_.SrcSuffixCapturingEmitter('.in', emitter)
-        self.assertTrue(em.match_src_suffix(file_out, file_in, env))
-        self.assertFalse(em.match_src_suffix(file_out, file_xx, env))
-
-    def test__match_src_suffix__subst(self):
-        def emitter(): pass
-
-        env = _Environment(FOOSUFFIX='.in')
-        file_out = [_Node('file.out')]
-        file_in = [_Node('file.in')]
-        file_xx = [_Node('file.xx')]
-
-        em = emitter_.SrcSuffixCapturingEmitter('$FOOSUFFIX', emitter)
-        self.assertTrue(em.match_src_suffix(file_out, file_in, env))
-        self.assertFalse(em.match_src_suffix(file_out, file_xx, env))
-
-    def test__call__(self):
-        env = _Environment(FOOSUFFIX='.in')
-        file_out = [_Node('file.out')]
-        file_in = [_Node('file.in')]
-        file_xx = [_Node('file.xx')]
-
-        emitter = mock.Mock(return_value='emitter')
-        fallback = mock.Mock(return_value='fallback')
-        em = emitter_.SrcSuffixCapturingEmitter('$FOOSUFFIX', emitter, fallback)
-        self.assertEqual(em(file_out, file_in, env), 'emitter')
-        emitter.assert_called_once_with(file_out, file_in, env)
-        fallback.assert_not_called()
-
-        emitter = mock.Mock(return_value='emitter')
-        fallback = mock.Mock(return_value='fallback')
-        em = emitter_.SrcSuffixCapturingEmitter('$FOOSUFFIX', emitter, fallback)
-        self.assertEqual(em(file_out, file_xx, env), 'fallback')
-        emitter.assert_not_called()
-        fallback.assert_called_once_with(file_out, file_xx, env)
 
 
 if __name__ == '__main__':

@@ -45,7 +45,7 @@ class package_symbols_Tests(unittest.TestCase):
         self.assertIs(util.ToolFinder, finder_.ToolFinder)
 
     def test_emitter_(self):
-        self.assertIs(util.SrcSuffixCapturingEmitter, emitter_.SrcSuffixCapturingEmitter)
+        self.assertIs(util.ConditionalEmitter, emitter_.ConditionalEmitter)
 
 
 if __name__ == '__main__':

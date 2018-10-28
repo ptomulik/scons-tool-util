@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Provides the :class:`.SrcSuffixCapturingEmitter` class.
+"""Provides the :class:`.ConditionalEmitter` class.
 """
 
 
-__all__ = ('ConditionalEmitter',
-           'SrcSuffixCapturingEmitter',)
+__all__ = ('ConditionalEmitter',)
 
 
 class ConditionalEmitter(object):
@@ -61,44 +60,6 @@ class ConditionalEmitter(object):
         cond = self.predicate(target, source, env)
         emitter = self.emitter_if if cond else self.emitter_else
         return emitter(target, source, env)
-
-
-class SrcSuffixCapturingEmitter(ConditionalEmitter):
-    """A :class:`.ConditionalEmitter` enabled for source nodes whose names end
-    with predefined suffix."""
-
-    __slots__ = ('_src_suffix',)
-
-    def __init__(self, src_suffix, emitter, fallback=None):
-        """
-        :param str src_suffix:
-            a source suffix to be matched, if source node name ends with this
-            suffix, then **emitter** is being called, otherwise **falback**
-            will be called; construction variables occurring in **src_suffix**
-            string will be substituted before matching,
-        :param emitter:
-            a callable object ``emitter(target, source, env)`` to be called
-            when ``str(source[0]).endswith(src_suffix)`` is ``True``,
-        :param fallback:
-            a callable object ``fallback(target, source, env)`` to be called
-            when ``str(source[0]).endswith(src_suffix)`` is ``False``.
-        """
-        self._src_suffix = src_suffix
-        predicate = self.match_src_suffix
-        ConditionalEmitter.__init__(self, predicate, emitter, fallback)
-
-    @property
-    def src_suffix(self):
-        """The value of parameter **src_suffix** passed in to the constructor
-        at object creation."""
-        return self._src_suffix
-
-    def match_src_suffix(self, target, source, env):
-        """A predicate function; matches **source[0]** suffix against
-        :attr:`.src_suffix`."""
-        src = str(source[0])
-        src_suffix = env.subst(self.src_suffix)
-        return src.endswith(src_suffix)
 
 
 # Local Variables:
