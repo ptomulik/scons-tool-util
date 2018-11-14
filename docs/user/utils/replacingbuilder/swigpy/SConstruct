@@ -1,0 +1,12 @@
+# SConstruct
+import sys
+env = Environment(tools=['default', 'swigpy'])
+env.Append(SWIGPY_LIBPATH=['.'])
+env.SharedLibrary('hello', 'hello.c', CPPDEFINES={'BUILDING_HELLO': 1})
+env.SwigPyShlib('hello', 'hello_wrap.c', SWIGPY_LIBS=['hello'], CPPDEFINES={'BUILDING_HELLO_WRAP': 1})
+if sys.platform == 'win32':
+  libs = []
+else:
+  libs = ['dl']
+
+env.Program('test.c', LIBS=libs)

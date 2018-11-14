@@ -23,38 +23,32 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #
 
-"""Ensure that the toolfinder/iconv example from user documentation works"""
+"""Ensure that the replacingbuilder/swigpy example from user documentation works"""
 
 import TestSCons
 import re
 import sys
 import os
 
+_dll = TestSCons._dll
+dll_ = TestSCons.dll_
+
 if sys.platform == 'win32':
     test = TestSCons.TestSCons(program='scons.bat', interpreter=None)
 else:
     test = TestSCons.TestSCons()
 
-if sys.version_info < (3,0):
-    from io import open as uopen
-else:
-    uopen = open
-
-if not test.where_is('iconv'):
-    test.skip_test("Could not find 'iconv', skipping test(s).\n")
-
-test.dir_fixture('../../../../../docs/user/utils/toolfinder/iconv')
+test.dir_fixture('../../../../../docs/user/utils/replacingbuilder/swigpy')
 
 test.run()
-test.must_contain_all_lines(test.stdout(), ['iconv -f LATIN2 -t UTF-8 latin2.txt > utf8.txt'])
 
-test.must_exist('utf8.txt')
-with uopen(test.workpath('latin2.txt'), 'r', encoding='latin2') as f:
-    latin2 = f.read()
+test.must_exist('%(dll_)shello%(_dll)s' % locals())
+test.must_exist('_hello.pyd')
 
-with uopen(test.workpath('utf8.txt'), 'r', encoding='utf8') as f:
-    utf8 = f.read()
-test.must_contain_exactly_lines(utf8, latin2.splitlines())
+os.environ['LD_LIBRARY_PATH'] = '.'
+os.environ['PATH'] = os.path.pathsep.join(['.', os.environ['PATH']])
+test.run(program='test')
+test.must_contain_exactly_lines(test.stdout(), ['Hello!!'])
 
 test.pass_test()
 

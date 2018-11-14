@@ -18,6 +18,7 @@ Utilities
    user/utils/toolfinder
    user/utils/conditionalemitter
    user/utils/selector
+   user/utils/replacingbuilder
 
 .. _SCons: https://scons.org/
 .. _SCons Tool Utilities: https://github.com/ptomulik/scons-tool-util/

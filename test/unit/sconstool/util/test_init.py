@@ -32,6 +32,7 @@ import sconstool.util.misc_ as misc_
 import sconstool.util.finder_ as finder_
 import sconstool.util.emitter_ as emitter_
 import sconstool.util.selector_ as selector_
+import sconstool.util.replacements_ as replacements_
 
 
 class package_symbols_Tests(unittest.TestCase):
@@ -50,6 +51,12 @@ class package_symbols_Tests(unittest.TestCase):
 
     def test_selector_(self):
         self.assertIs(util.Selector, selector_.Selector)
+
+    def test_replacements_(self):
+        self.assertIs(util.Replacements, replacements_.Replacements)
+        self.assertIs(util.ReplacingCaller, replacements_.ReplacingCaller)
+        self.assertIs(util.ReplacingBuilder, replacements_.ReplacingBuilder)
+        self.assertIs(util.ReplacingAction, replacements_.ReplacingAction)
 
 
 if __name__ == '__main__':

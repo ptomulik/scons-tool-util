@@ -1,3 +1,4 @@
 # SConstruct
-env = Environment(tools=['iconv'])
-env.Iconv('utf8.txt', 'latin2.txt', ICONVFROM='latin2')
+import os
+env = Environment(tools=['iconv'], ENV={'PATH': os.environ['PATH']})
+env.Iconv('utf8.txt', 'latin2.txt', ICONVFROM='LATIN2')

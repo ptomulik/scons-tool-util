@@ -31,6 +31,10 @@ summary below provides links to a full documentation for each class.
     ToolFinder
     ConditionalEmitter
     Selector
+    Replacements
+    ReplacingCaller
+    ReplacingBuilder
+    ReplacingAction
 
 .. _Functions:
 

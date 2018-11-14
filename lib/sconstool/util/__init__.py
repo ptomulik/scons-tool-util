@@ -11,7 +11,8 @@ import_all_from(__package__, [
     '.misc_',
     '.finder_',
     '.emitter_',
-    '.selector_'
+    '.selector_',
+    '.replacements_'
 ])
 
 # Local Variables:

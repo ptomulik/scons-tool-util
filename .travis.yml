@@ -21,7 +21,7 @@ before_script:
 
 script:
   - coverage run --source=sconstool.util -m unittest discover -t . -s test/unit
-  - python runtest -e test/system/
+  - python runtest --verbose=2 -e test/system/
 
 after_script:
   - coveralls
