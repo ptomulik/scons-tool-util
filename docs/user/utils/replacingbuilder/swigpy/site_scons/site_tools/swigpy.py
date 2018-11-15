@@ -2,27 +2,32 @@ from sconstool.util import *
 import SCons.Tool
 import SCons.Builder
 
-swigPyReplacements = {
-  'LINK': 'SWIGPY_LINK',
-  'LINKFLAGS': 'SWIGPY_LINKFLAGS',
-  'LIBPATH': 'SWIGPY_LIBPATH',
-  'LIBS': 'SWIGPY_LIBS',
-  'SHOBJPREFIX': 'SWIGPY_SHOBJPREFIX',
-  'SHOBJSUFFIX': 'SWIGPY_SHOBJSUFFIX',
-  'LIBPREFIX': 'SWIGPY_LIBPREFIX',
-  'LIBSUFFIX': 'SWIGPY_LIBSUFFIX',
-  'SHLIBPREFIX': 'SWIGPY_SHLIBPREFIX',
-  'SHLIBSUFFIX': 'SWIGPY_SHLIBSUFFIX',
-  'IMPLIBPREFIX': 'SWIGPY_IMPLIBPREFIX',
-  'IMPLIBSUFFIX': 'SWIGPY_IMPLIBSUFFIX',
-  'WINDOWSEXPPREFIX': 'SWIGPY_WINDOWSEXPPREFIX',
-  'WINDOWSEXPSUFFIX': 'SWIGPY_WINDOWSEXPSUFFIX'
-}
+SwigPyVars = [
+  'LINK',
+  'LINKFLAGS',
+  'LIBPATH',
+  'LIBS',
+  'SHOBJPREFIX',
+  'SHOBJSUFFIX',
+  'LIBPREFIX',
+  'LIBSUFFIX',
+  'SHLIBPREFIX',
+  'SHLIBSUFFIX',
+  'IMPLIBPREFIX',
+  'IMPLIBSUFFIX',
+  'WINDOWSEXPPREFIX',
+  'WINDOWSEXPSUFFIX'
+]
+
+
+SwigPyReplacements = Replacements({k: 'SWIGPY_%s' % k for k in SwigPyVars })
 
 
 class SwigPyShlibBuilder(ReplacingBuilder):
     def __call__(self, env, target, source, **kw):
-        # preserve 'LIBSUFFIXES' and 'LIBPREFIXES'
+        # preserve original 'LIBSUFFIXES' and 'LIBPREFIXES', such that
+        # libraries having original 'LIBPREFIX', 'LIBSUFFIX', 'SHLIBPREFIX',
+        # etc. will be found when required by the linker.
         ovr = {'LIBPREFIXES': [env.subst(x) for x in env['LIBPREFIXES']],
                'LIBSUFFIXES': [env.subst(x) for x in env['LIBSUFFIXES']]}
         return ReplacingBuilder.__call__(self, env, target, source, **dict(ovr, **kw))
@@ -33,23 +38,23 @@ def createSwigPyShlibBuilder(env):
         swigpy_shlib = env['BUILDERS']['SwigPyShlib']
     except KeyError:
         shlib = SCons.Tool.createSharedLibBuilder(env)
-        swigpy_shlib = SwigPyShlibBuilder(shlib, swigPyReplacements)
+        swigpy_shlib = SwigPyShlibBuilder(shlib, SwigPyReplacements)
         env['BUILDERS']['SwigPyShlib'] = swigpy_shlib
     return swigpy_shlib
 
 
-def setSwigPyDefaults(env, replacements):
+def setSwigPyDefaults(env):
     env.SetDefault(SWIGPY_SHLIBPREFIX='_')
     env.SetDefault(SWIGPY_LIBPREFIX='_')
     env.SetDefault(SWIGPY_IMPLIBPREFIX='_')
     env.SetDefault(SWIGPY_WINDOWSEXPPREFIX='_')
     env.SetDefault(SWIGPY_SHLIBSUFFIX='.pyd')
-    replacements.inject(env, 'SetDefault')
+    SwigPyReplacements.inject(env, 'SetDefault')
 
 
 def generate(env):
-    swigpy_shlib = createSwigPyShlibBuilder(env)
-    setSwigPyDefaults(env, swigpy_shlib.replacements)
+    createSwigPyShlibBuilder(env)
+    setSwigPyDefaults(env)
 
 
 def exists(env):

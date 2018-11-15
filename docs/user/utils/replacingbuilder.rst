@@ -101,7 +101,7 @@ program that will load ``_hello.pyd`` at runtime.
 
    $ scons
    $ LD_LIBRARY_PATH='.' ./test
-   Hello!
+   Hello!!
 
 
 .. _SWIG: https://swig.org/
