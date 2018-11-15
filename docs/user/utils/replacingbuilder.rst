@@ -92,15 +92,15 @@ program that will load ``_hello.pyd`` at runtime.
    :language: c
    :caption: Header file: ``hello_wrap.h``
 
-.. literalinclude:: replacingbuilder/swigpy/test.c
+.. literalinclude:: replacingbuilder/swigpy/test_hello.c
    :language: c
-   :caption: Test program: ``test.c``
+   :caption: Test program: ``test_hello.c``
 
 .. code-block:: console
    :caption: Testing on Linux
 
    $ scons
-   $ LD_LIBRARY_PATH='.' ./test
+   $ LD_LIBRARY_PATH='.' ./test_hello
    Hello!!
 
 

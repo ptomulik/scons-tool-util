@@ -47,7 +47,7 @@ test.must_exist('_hello.pyd')
 
 os.environ['LD_LIBRARY_PATH'] = '.'
 os.environ['PATH'] = os.path.pathsep.join(['.', os.environ['PATH']])
-test.run(program='test')
+test.run(program='test_hello')
 test.must_contain_exactly_lines(test.stdout(), ['Hello!!'])
 
 test.pass_test()
