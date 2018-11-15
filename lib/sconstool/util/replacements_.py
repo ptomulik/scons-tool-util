@@ -161,8 +161,8 @@ class ReplacingCaller(object):
 
     def inject_replacements(self, env, setter='__setitem__',
                             only_present=False):
-        """Same as :meth:`replacements.inject(self,env,setter,only_present)<.Replacements.inject>`.
-        """
+        """Same as :meth:`replacements.inject(self,env,setter,only_present)
+        <.Replacements.inject>`."""
         self.replacements.inject(self, env, setter, only_present)
 
     def sort_call_args(self, *args):
