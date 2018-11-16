@@ -136,6 +136,16 @@ program that will load ``_hello.pyd`` at runtime.
    :caption: Testing on Linux
 
    $ scons
+   scons: Reading SConscript files ...
+   scons: done reading SConscript files.
+   scons: Building targets ...
+   gcc -o hello_wrap.os -c -fPIC -DBUILDING_HELLO_WRAP=1 hello_wrap.c
+   gcc -o hello.os -c -fPIC -DBUILDING_HELLO=1 hello.c
+   gcc -o libhello.so -shared hello.os
+   gcc -o _hello.pyd -shared hello_wrap.os -L. -lhello
+   gcc -o test_hello.o -c test_hello.c
+   gcc -o test_hello test_hello.o -ldl
+   scons: done building targets.
    $ LD_LIBRARY_PATH='.' ./test_hello
    wrap
      hello

@@ -32,6 +32,8 @@ import os
 
 _dll = TestSCons._dll
 dll_ = TestSCons.dll_
+_shobj = TestSCons._shobj
+_exe = TestSCons._exe
 
 if sys.platform == 'win32':
     test = TestSCons.TestSCons(program='scons.bat', interpreter=None)
@@ -42,13 +44,23 @@ test.dir_fixture('../../../../../docs/user/utils/replacingbuilder/swigpy')
 
 test.run()
 
+test.must_exist('hello_wrap%(_shobj)s' % locals())
+test.must_exist('hello%(_shobj)s' % locals())
 test.must_exist('%(dll_)shello%(_dll)s' % locals())
 test.must_exist('_hello.pyd')
+test.must_exist('test_hello%(_exe)s' % locals())
 
 os.environ['LD_LIBRARY_PATH'] = '.'
 os.environ['PATH'] = os.path.pathsep.join(['.', os.environ['PATH']])
 test.run(program='test_hello')
 test.must_contain_exactly_lines(test.stdout(), ['wrap', '  hello', 'unwrap'])
+
+test.run(['-c'])
+test.must_not_exist('hello_wrap%(_shobj)s' % locals())
+test.must_not_exist('hello%(_shobj)s' % locals())
+test.must_not_exist('%(dll_)shello%(_dll)s' % locals())
+test.must_not_exist('_hello.pyd')
+test.must_not_exist('test_hello%(_exe)s' % locals())
 
 test.pass_test()
 
