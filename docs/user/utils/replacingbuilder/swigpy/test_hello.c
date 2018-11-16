@@ -26,23 +26,18 @@ void error_exit(LPTSTR func)
 
     LPVOID msg;
 
-    FormatMessageA(
-        FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
-        GetLastError(),
-        MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
-        (LPTSTR) &msg,
-        0, NULL );
-
-    fprintf(stderr, "%s() failed: %s\n", func, (LPTSTR)msg);
-    fflush(stderr);
-
-    // Display the error message and exit the process
-
+    FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                    FORMAT_MESSAGE_FROM_SYSTEM |
+                    FORMAT_MESSAGE_IGNORE_INSERTS,
+                    NULL,
+                    GetLastError(),
+                    MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+                    (LPTSTR) &msg,
+                    0, NULL );
+    fprintf(stderr, "%s() failed: %s\r\n", func, (LPTSTR)msg);
     LocalFree(msg);
-    ExitProcess(EXIT_FAILURE);
+
+    exit(EXIT_FAILURE);
 }
 
 #else
@@ -50,7 +45,6 @@ void error_exit(LPTSTR func)
 void error_exit(char const* func)
 {
     fprintf(stderr, "%s() failed: %s\n", func, dlerror());
-    fflush(stderr);
     exit(EXIT_FAILURE);
 }
 

@@ -7,8 +7,10 @@
 # else
 #  define HELLO_API __declspec(dllimport)
 # endif
+# define EOL "\r\n"
 #else
 # define HELLO_API
+# define EOL "\n"
 #endif
 
 #ifdef __cplusplus
