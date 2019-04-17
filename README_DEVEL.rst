@@ -10,6 +10,7 @@ On a fresh clone do::
 
    pipenv install --dev
    pipenv run bin/downloads.py
+   pipenv run pip install -e .
 
 Running tests
 -------------
@@ -18,7 +19,7 @@ There are some end-to-end tests. They can be ran this way:
 
 .. code:: shell
 
-   pipenv run python runtest.py -e test/system
+   pipenv run python runtest -e test/system
 
 Unit tests may also be executed, for example:
 
