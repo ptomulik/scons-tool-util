@@ -20,6 +20,10 @@ before_test:
 
 build: off
 
+matrix:
+  allow_failures:
+    - PYTHON: "C:\\Python27"
+
 test_script:
   - python -m pipenv run python -m unittest discover -t . -s "test\\unit"
   - cmd: powershell -Command "& { python -m pipenv run python runtest --verbose=2 -e test\\system; if($LastExitCode -eq 2 -Or $LastExitCode -eq 0) { $host.SetShouldExit(0)} else {$host.SetShouldExit(1)}}"

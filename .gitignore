@@ -19,6 +19,7 @@
 *.tox
 *.deb
 /MANIFEST
+/Pipfile.lock
 
 # Docker
 /docker-compose
