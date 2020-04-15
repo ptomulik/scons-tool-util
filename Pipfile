@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [dev-packages]
-scons = ">=3.0.1"
+scons-select = { path = "./deps/scons-select" }
 sphinx = ">=1.7.4"
 twine = "*"
 unittest2 = {version = ">=1.0,<3.0",markers = "python_version < '2.7.9' or (python_version >= '3.0' and python_version < '3.4')"}

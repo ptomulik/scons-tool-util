@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from sconstool.util import *
 import SCons.Tool
 import SCons.Builder

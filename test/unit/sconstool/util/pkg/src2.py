@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 __all__ = ('foo2', 'bar2')
 foo2 = type('foo2', (object,), dict())
 bar2 = type('bar2', (object,), dict())
